@@ -4,7 +4,7 @@ import { CountUp } from '../components/CountUp'
 import { SummaryCard } from '../components/SummaryCard'
 import { count, date, hourRange, money, moneyRound, percent, plural, time } from '../lib/format'
 import { DAYS, type Stats } from '../lib/stats'
-import { delay } from '../lib/ui'
+import { delay, fit } from '../lib/ui'
 
 export type Theme = 'blue' | 'red' | 'navy' | 'white' | 'yellow' | 'sky'
 
@@ -14,6 +14,9 @@ export interface Slide {
   content: ReactNode
 }
 
+// The first UK lockdown ran from 23 March to early July 2020.
+const duringLockdown = (from: Date, to: Date) => from < new Date(2020, 6, 4) && to > new Date(2020, 2, 23)
+
 export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFile: () => void }): Slide[] {
   const slides: Slide[] = []
   const add = (id: string, theme: Theme, content: ReactNode) => slides.push({ id, theme, content })
@@ -21,7 +24,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
   add('intro', 'blue', (
     <>
       <p className="eyebrow rise">Tesco Wrapped</p>
-      <h1 className="huge rise" style={delay(150)}>{s.isAllTime ? 'All time' : s.periodLabel}</h1>
+      <h1 className="huge rise" style={fit(s.isAllTime ? 'All time' : s.periodLabel, 150)}>{s.isAllTime ? 'All time' : s.periodLabel}</h1>
       <p className="lede rise" style={delay(400)}>
         Every receipt, every meal deal, every “I only came in for milk”. Let's see what your baskets say about you.
       </p>
@@ -32,7 +35,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
   add('trips', 'red', (
     <>
       <p className="lede rise">{s.isAllTime ? `Since ${date(s.first)}` : `${s.periodHeading[0].toUpperCase()}${s.periodHeading.slice(1)}`} you popped into Tesco</p>
-      <h1 className="huge rise" style={delay(150)}>
+      <h1 className="huge rise" style={fit(count(s.trips), 150)}>
         <CountUp value={s.trips} format={count} />
       </h1>
       <p className="big rise" style={delay(300)}>times</p>
@@ -46,7 +49,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
   add('spend', 'navy', (
     <>
       <p className="lede rise">All in, you spent</p>
-      <h1 className="huge rise" style={delay(150)}>
+      <h1 className="huge rise" style={fit(moneyRound(s.spend), 150)}>
         <CountUp value={s.spend} format={moneyRound} />
       </h1>
       <p className="lede rise" style={delay(800)}>
@@ -74,7 +77,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
     add('savings', 'yellow', (
       <>
         <p className="lede rise">Clubcard prices and offers saved you</p>
-        <h1 className="huge rise" style={delay(150)}>
+        <h1 className="huge rise" style={fit(money(s.savings), 150)}>
           <CountUp value={s.savings} format={money} />
         </h1>
         <p className="lede rise" style={delay(900)}>
@@ -90,7 +93,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
     <>
       <p className="lede rise">Your biggest shop was on</p>
       <h2 className="title rise" style={delay(150)}>{date(big.date)}</h2>
-      <h1 className="huge rise" style={delay(300)}>
+      <h1 className="huge rise" style={fit(money(big.total), 300)}>
         <CountUp value={big.total} format={money} delay={500} />
       </h1>
       <p className="lede rise" style={delay(900)}>
@@ -110,7 +113,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
       <>
         <p className="lede rise">The single most expensive thing you bought?</p>
         <h2 className="title rise" style={delay(300)}>{s.priciestItem.item.name}</h2>
-        <h1 className="huge rise" style={delay(600)}>{money(s.priciestItem.item.unitPrice)}</h1>
+        <h1 className="huge rise" style={fit(money(s.priciestItem.item.unitPrice), 600)}>{money(s.priciestItem.item.unitPrice)}</h1>
         <p className="small rise" style={delay(900)}>Bought on {date(s.priciestItem.date)}. Treat yourself.</p>
       </>
     ))
@@ -119,7 +122,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
   add('items', 'blue', (
     <>
       <p className="lede rise">You carried home</p>
-      <h1 className="huge rise" style={delay(150)}>
+      <h1 className="huge rise" style={fit(count(s.itemCount), 150)}>
         <CountUp value={s.itemCount} format={count} />
       </h1>
       <p className="big rise" style={delay(300)}>items</p>
@@ -165,7 +168,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
   add('when', 'sky', (
     <>
       <p className="lede rise">Your favourite day to shop is</p>
-      <h1 className="huge rise" style={{ ...delay(150), fontSize: `${Math.min(88, Math.floor(440 / (s.favouriteDay.length + 1)))}px` }}>
+      <h1 className="huge rise" style={fit(`${s.favouriteDay}s`, 150)}>
         {s.favouriteDay}s
       </h1>
       <p className="lede rise" style={delay(350)}>
@@ -184,7 +187,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
       </p>
       {s.longestGap && s.longestGap.days > 1 && (
         <p className="lede rise" style={delay(900)}>
-          But between {date(s.longestGap.from)} and {date(s.longestGap.to)} you went <strong>{plural(s.longestGap.days, 'day')}</strong> without a single Tesco trip. Were you okay?
+          But between {date(s.longestGap.from)} and {date(s.longestGap.to)} you went <strong>{plural(s.longestGap.days, 'day')}</strong> without a single Tesco trip. {duringLockdown(s.longestGap.from, s.longestGap.to) ? 'Lockdown, eh? Fair enough.' : 'Were you okay?'}
         </p>
       )}
     </>
@@ -194,7 +197,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
   add('clock', 'navy', (
     <>
       <p className="lede rise">{owl >= 0.15 ? 'A certified night owl 🦉' : 'Early bird or night owl?'}</p>
-      <h1 className="huge rise" style={delay(150)}>
+      <h1 className="huge rise" style={fit(count(s.lateNight), 150)}>
         <CountUp value={s.lateNight} format={count} />
       </h1>
       <p className="lede rise" style={delay(300)}>{s.lateNight === 1 ? 'shop' : 'shops'} after 9pm</p>
@@ -218,7 +221,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
     add('pay', 'blue', (
       <>
         <p className="lede rise">Cash or card?</p>
-        <h1 className="huge rise" style={delay(150)}>{percent(cardWins ? s.cardShare : s.cashShare)}</h1>
+        <h1 className="huge rise" style={fit(percent(cardWins ? s.cardShare : s.cashShare), 150)}>{percent(cardWins ? s.cardShare : s.cashShare)}</h1>
         <p className="lede rise" style={delay(300)}>of your spending was by {cardWins ? 'card' : 'cash'}.</p>
         <div className="split rise" style={delay(600)}>
           <div className="split-card" style={{ flexGrow: Math.max(s.cardShare, 0.02) }}>Card</div>
@@ -235,7 +238,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
     add('fuel', 'red', (
       <>
         <p className="lede rise">And at the pump…</p>
-        <h1 className="huge rise" style={delay(150)}>
+        <h1 className="huge rise" style={fit(count(s.fuelLitres), 150)}>
           <CountUp value={s.fuelLitres} format={count} />
         </h1>
         <p className="big rise" style={delay(300)}>litres</p>
