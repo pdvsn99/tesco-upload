@@ -2,10 +2,14 @@
 // The export is messy (mixed casing, missing names, refunds, old till-receipt
 // abbreviations) so everything defensive lives here.
 
+import { linkOldNames } from './linkNames'
+
 export type PaymentMethod = 'card' | 'cash' | 'giftcard' | 'other'
 
 export interface Item {
   name: string
+  rawName: string // exactly as it appears in the export
+  fromTill: boolean // an old-style SHOUTY till-receipt name (before ~2019)
   key: string // normalised name used for grouping
   quantity: number
   unitPrice: number
@@ -51,7 +55,6 @@ const ABBREVIATIONS: [RegExp, string][] = [
   [/\bltr\b/gi, 'Litre'],
   [/\bspkling\b/gi, 'Sparkling'],
   [/\bvngr\b/gi, 'Vinegar'],
-  [/\bb\/berry\b/gi, 'Blueberry'],
   [/\bb\/crnt\b/gi, 'Blackcurrant'],
   [/^t\.? (?=[a-z])/i, 'Tesco '],
   [/\s*\(c\)$/i, ''],
@@ -80,8 +83,11 @@ function parseItem(raw: Record<string, unknown>): Item {
   // Fuel shows up as a nameless line with a fractional "volume" (litres).
   const isFuel = !rawName && volume > 2 && !Number.isInteger(volume)
   const name = rawName ? tidyName(rawName) : isFuel ? 'Fuel' : 'Mystery item'
+  const letters = rawName.replace(/[^a-zA-Z]/g, '')
   return {
     name,
+    rawName,
+    fromTill: !!letters && letters === letters.toUpperCase(),
     key: name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(),
     quantity,
     unitPrice,
@@ -150,5 +156,7 @@ export function parseExport(json: unknown): Shop[] {
     ...orders.map((o) => parseShop(o as Record<string, unknown>, 'online')),
   ].filter((s): s is Shop => s !== null)
   if (!shops.length) throw new Error("We found the file, but couldn't read any dates in it.")
-  return shops.sort((a, b) => a.date.getTime() - b.date.getTime())
+  shops.sort((a, b) => a.date.getTime() - b.date.getTime())
+  linkOldNames(shops)
+  return shops
 }
