@@ -71,7 +71,6 @@ export function tidyName(raw: string): string {
     s = s.toLowerCase().replace(/(^|[\s(&/-])([a-z])/g, (_, p, c) => p + c.toUpperCase())
   }
   for (const [re, to] of ABBREVIATIONS) s = s.replace(re, to)
-  if (/^medium sliced white$/i.test(s)) return 'Medium Sliced White Bread'
   return s.trim()
 }
 

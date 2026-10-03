@@ -1,26 +1,26 @@
 import { useRef, useState } from 'react'
 import { delay } from '../lib/ui'
-import { parseExport, type Shop } from '../lib/parse'
+import type { Shop } from '../lib/parse'
+import { readExportFile } from '../lib/readFile'
+import { forgetExport, saveExport } from '../lib/storage'
 
-export function Upload({ onLoaded }: { onLoaded: (shops: Shop[]) => void }) {
+const TESCO_DATA_PAGE = 'https://www.tesco.com/account/data-portability/en-GB/'
+
+export function Upload({ onLoaded }: { onLoaded: (shops: Shop[], remembered: boolean) => void }) {
   const input = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [remember, setRemember] = useState(true)
 
   async function read(file: File | undefined) {
     if (!file) return
     setError(null)
     setBusy(true)
     try {
-      const text = await file.text()
-      let json: unknown
-      try {
-        json = JSON.parse(text)
-      } catch {
-        throw new Error("That file isn't valid JSON. Upload the .json file from your Tesco data download.")
-      }
-      onLoaded(parseExport(json))
+      const { shops, json } = await readExportFile(file)
+      await (remember ? saveExport(json) : forgetExport())
+      onLoaded(shops, remember)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong reading that file.')
     } finally {
@@ -58,13 +58,13 @@ export function Upload({ onLoaded }: { onLoaded: (shops: Shop[]) => void }) {
           disabled={busy}
         >
           <span className="dropzone-icon" aria-hidden>🛒</span>
-          <strong>{busy ? 'Reading your receipts…' : 'Choose your transactions file'}</strong>
-          <span>or drag and drop the .json file here</span>
+          <strong>{busy ? 'Reading your receipts…' : 'Choose your Tesco data file'}</strong>
+          <span>The .zip Tesco sends you, or the .json inside it</span>
         </button>
         <input
           ref={input}
           type="file"
-          accept=".json,application/json"
+          accept=".json,.zip,application/json,application/zip"
           hidden
           onChange={(e) => {
             read(e.target.files?.[0])
@@ -72,20 +72,32 @@ export function Upload({ onLoaded }: { onLoaded: (shops: Shop[]) => void }) {
           }}
         />
 
+        <label className="remember rise" style={delay(280)}>
+          <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+          Remember my data on this device, so I don't have to upload it again
+        </label>
+
         {error && <p className="error" role="alert">{error}</p>}
 
         <details className="howto rise" style={delay(320)}>
-          <summary>Where do I get this file?</summary>
+          <summary>How do I get my Tesco data?</summary>
+          <p className="howto-note">It's free and takes a few minutes. Tesco usually emails you within a few hours (up to 48).</p>
           <ol>
-            <li>Sign in to your account on the Tesco website.</li>
-            <li>Find the privacy section and request a copy of your data.</li>
-            <li>When Tesco emails you the download, open it and find the transactions <code>.json</code> file.</li>
-            <li>Upload that file here.</li>
+            <li>
+              Go to Tesco's <a href={TESCO_DATA_PAGE} target="_blank" rel="noreferrer">data portability page</a>, or sign in at
+              tesco.com and open <strong>My account → My details → Request your Tesco data</strong>.
+            </li>
+            <li>Tap <strong>Start your request</strong>. Tesco texts a code to your phone to check it's you.</li>
+            <li>Wait for the email from Tesco saying your data is ready, then download it. You may need the code again.</li>
+            <li>Upload the download here. The .zip file is fine, no need to unzip it.</li>
           </ol>
+          <p className="howto-note">
+            Don't have an online account? Register your Clubcard at tesco.com first, or call Tesco on 0800 917 6895.
+          </p>
         </details>
 
         <p className="privacy rise" style={delay(400)}>
-          🔒 Your file never leaves your device. Everything is worked out in your browser.
+          🔒 Your data never leaves your device. Everything is worked out in your browser.
         </p>
       </div>
       <footer className="disclaimer">A fan-made project. Not affiliated with or endorsed by Tesco.</footer>

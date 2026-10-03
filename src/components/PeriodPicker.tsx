@@ -1,10 +1,12 @@
 import type { Period, PeriodId } from '../lib/stats'
 import { delay } from '../lib/ui'
 
-export function PeriodPicker({ periods, onPick, onReset }: {
+export function PeriodPicker({ periods, remembered, onPick, onReset, onForget }: {
   periods: Period[]
+  remembered: boolean
   onPick: (id: PeriodId) => void
   onReset: () => void
+  onForget: () => void
 }) {
   const [all, twelve, ...years] = periods
   return (
@@ -38,7 +40,15 @@ export function PeriodPicker({ periods, onPick, onReset }: {
           </>
         )}
 
-        <button type="button" className="link-button" onClick={onReset}>Upload a different file</button>
+        <div className="pick-footer">
+          <button type="button" className="link-button" onClick={onReset}>Upload a different file</button>
+          {remembered && (
+            <p className="privacy">
+              💾 Saved on this device only.{' '}
+              <button type="button" className="link-button inline" onClick={onForget}>Forget my data</button>
+            </p>
+          )}
+        </div>
       </div>
     </main>
   )

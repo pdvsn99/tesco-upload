@@ -92,6 +92,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .pick-year { padding: 12px; }
 .pick-year strong { font-family: var(--font-display); font-size: 20px; }
 .link-button { background: none; border: 0; padding: 8px 0; text-decoration: underline; opacity: .85; align-self: center; }
+.link-button.inline { padding: 0; font-size: inherit; }
+.pick-footer { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.remember { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.4; cursor: pointer; }
+.remember input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--clubcard-yellow); flex-shrink: 0; }
+.howto a { color: var(--clubcard-yellow); font-weight: 700; }
+.howto li { margin-bottom: 6px; }
+.howto-note { margin: 10px 0 0; font-size: 14px; opacity: .9; }
 
 /* ---------- Story ---------- */
 .story {
