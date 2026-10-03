@@ -2,7 +2,9 @@ import { useRef, useState } from 'react'
 import { delay } from '../lib/ui'
 import { readUpload, type LoadedData } from '../lib/readFile'
 import { forgetUpload, saveUpload } from '../lib/storage'
+import { detectPlatform } from '../lib/device'
 import { HowItWorks } from './HowItWorks'
+import { PhoneTip } from './PhoneTip'
 
 export function Upload({ onLoaded }: { onLoaded: (data: LoadedData, remembered: boolean) => void }) {
   const input = useRef<HTMLInputElement>(null)
@@ -11,6 +13,7 @@ export function Upload({ onLoaded }: { onLoaded: (data: LoadedData, remembered: 
   const [busy, setBusy] = useState(false)
   const [remember, setRemember] = useState(true)
   const [showHow, setShowHow] = useState(false)
+  const [platform] = useState(detectPlatform)
 
   async function read(file: File | undefined) {
     if (!file) return
@@ -63,13 +66,15 @@ export function Upload({ onLoaded }: { onLoaded: (data: LoadedData, remembered: 
         <input
           ref={input}
           type="file"
-          accept=".json,.zip,.csv,application/json,application/zip,text/csv"
+          accept=".json,.zip,.csv,application/json,application/zip,application/x-zip-compressed,text/csv,application/octet-stream"
           hidden
           onChange={(e) => {
             read(e.target.files?.[0])
             e.target.value = ''
           }}
         />
+
+        <PhoneTip platform={platform} />
 
         <label className="remember rise" style={delay(280)}>
           <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
@@ -81,7 +86,7 @@ export function Upload({ onLoaded }: { onLoaded: (data: LoadedData, remembered: 
         <button type="button" className="howto-link rise" style={delay(320)} onClick={() => setShowHow(true)}>
           How does it work?
         </button>
-        <HowItWorks open={showHow} onClose={() => setShowHow(false)} />
+        <HowItWorks open={showHow} platform={platform} onClose={() => setShowHow(false)} />
 
         <p className="privacy rise" style={delay(400)}>🔒 Your data never leaves your device.</p>
       </div>

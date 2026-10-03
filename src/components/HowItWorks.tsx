@@ -1,9 +1,10 @@
 import { useEffect, useRef, type CSSProperties } from 'react'
+import type { Platform } from '../lib/device'
 import { comingSoonSources, readySources } from '../sources'
 
 // The "How does it work?" pop-up: the steps, which supermarkets work, and how
 // to get your data from each one.
-export function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function HowItWorks({ open, platform, onClose }: { open: boolean; platform: Platform; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
@@ -26,7 +27,13 @@ export function HowItWorks({ open, onClose }: { open: boolean; onClose: () => vo
 
         <ol className="steps">
           <li><span><strong>Ask your supermarket for your data.</strong> It's free, and it's your right to have it.</span></li>
-          <li><span><strong>Upload what they send you here.</strong> The .zip is fine, no need to open it.</span></li>
+          <li>
+            <span>
+              <strong>Upload what they send you here.</strong> The .zip is fine, no need to open it.
+              {platform === 'ios' && ' On iPhone, download it in Safari and it will be in Files → Recents.'}
+              {platform === 'android' && ' On Android, it will be in your Downloads.'}
+            </span>
+          </li>
           <li><span><strong>Tap through your story.</strong> Your data never leaves your device.</span></li>
         </ol>
 
