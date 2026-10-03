@@ -4,8 +4,9 @@ import { count, moneyRound } from '../lib/format'
 import type { Stats } from '../lib/stats'
 import { delay } from '../lib/ui'
 
-export function SummaryCard({ stats: s, onRestart, onNewFile }: {
+export function SummaryCard({ stats: s, shop, onRestart, onNewFile }: {
   stats: Stats
+  shop: string
   onRestart: () => void
   onNewFile: () => void
 }) {
@@ -17,11 +18,11 @@ export function SummaryCard({ stats: s, onRestart, onNewFile }: {
     setSaving(true)
     try {
       const url = await toPng(card.current, { pixelRatio: 3, cacheBust: true })
-      const fileName = `tesco-wrapped-${s.periodLabel.toLowerCase().replace(/\s+/g, '-')}.png`
+      const fileName = `aisle-be-back-${s.periodLabel.toLowerCase().replace(/\s+/g, '-')}.png`
       const blob = await (await fetch(url)).blob()
       const file = new File([blob], fileName, { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'My Tesco Wrapped' })
+        await navigator.share({ files: [file], title: 'My Aisle Be Back' })
       } else {
         const a = document.createElement('a')
         a.href = url
@@ -49,8 +50,8 @@ export function SummaryCard({ stats: s, onRestart, onNewFile }: {
     <div className="summary">
       <div ref={card} className="summary-card rise">
         <div className="summary-head">
-          <span className="summary-brand">Tesco Wrapped</span>
-          <span className="summary-period">{s.periodLabel}</span>
+          <span className="summary-brand">Aisle Be Back</span>
+          <span className="summary-period">{shop} · {s.periodLabel}</span>
         </div>
         <div className="summary-persona">
           <span className="persona-emoji small-emoji">{s.persona.emoji}</span>

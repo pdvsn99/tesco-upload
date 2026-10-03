@@ -10,7 +10,7 @@
 //    in order
 //  - the price must be similar, and the full name must start appearing
 //    around when the old name stopped
-import type { Shop } from './parse'
+import type { Shop } from '../../lib/types'
 
 const DAY = 86_400_000
 // Filler and packaging words say nothing about what the product is.

@@ -1,4 +1,4 @@
-import type { Item, Shop } from './parse'
+import type { Item, Shop } from './types'
 import { carrierBags, christmas, habits, priceCheck, seasons, thenVsNow } from './extras'
 import { pickPersona, shopperType, timeBadge } from './persona'
 

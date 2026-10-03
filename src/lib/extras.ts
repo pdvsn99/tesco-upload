@@ -1,6 +1,6 @@
 // Stats for the "price check", "then vs now", habits and fun-extra slides.
 // Some of these need the whole history, not just the chosen period.
-import type { Item, Shop } from './parse'
+import type { Item, Shop } from './types'
 import type { PeriodId } from './stats'
 
 const DAY = 86_400_000

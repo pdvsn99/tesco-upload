@@ -1,8 +1,9 @@
 import type { Period, PeriodId } from '../lib/stats'
 import { delay } from '../lib/ui'
 
-export function PeriodPicker({ periods, remembered, onPick, onReset, onForget }: {
+export function PeriodPicker({ periods, shopName, remembered, onPick, onReset, onForget }: {
   periods: Period[]
+  shopName: string
   remembered: boolean
   onPick: (id: PeriodId) => void
   onReset: () => void
@@ -12,7 +13,7 @@ export function PeriodPicker({ periods, remembered, onPick, onReset, onForget }:
   return (
     <main className="screen screen-pick">
       <div className="upload-inner">
-        <p className="eyebrow rise">Got it! {all.trips.toLocaleString('en-GB')} shops found</p>
+        <p className="eyebrow rise">Got it! {all.trips.toLocaleString('en-GB')} {shopName} shops found</p>
         <h1 className="title rise" style={delay(80)}>
           Which story do you want to see?
         </h1>

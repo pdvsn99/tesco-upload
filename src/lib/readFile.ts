@@ -1,47 +1,48 @@
 import { unzipSync, strFromU8 } from 'fflate'
-import { parseExport, type Shop } from './parse'
+import { readySources, type Source, type UploadedFile } from '../sources'
+import type { Shop } from './types'
 
-// Accepts either the transactions .json file or the whole .zip Tesco sends,
-// and returns the parsed shops plus the JSON text (so it can be remembered).
-export async function readExportFile(file: File): Promise<{ shops: Shop[]; json: string }> {
-  const bytes = new Uint8Array(await file.arrayBuffer())
-  const isZip = bytes[0] === 0x50 && bytes[1] === 0x4b // every zip starts with "PK"
-  if (!isZip) return readJson(new TextDecoder().decode(bytes))
-
-  const candidates = jsonFilesIn(bytes)
-  if (!candidates.length) throw new Error("That zip doesn't contain any .json files. Is it the download from Tesco?")
-  // The transactions file is usually named "...transactions.json", so try that first.
-  candidates.sort((a, b) => Number(/transaction/i.test(b.name)) - Number(/transaction/i.test(a.name)))
-  for (const c of candidates) {
-    try {
-      return readJson(c.text)
-    } catch {
-      // not the shopping history; try the next file
-    }
-  }
-  throw new Error("We opened the zip but couldn't find your shopping history in it.")
+export interface LoadedData {
+  source: Source
+  shops: Shop[]
+  file: UploadedFile // kept so it can be remembered in the browser
 }
 
-function jsonFilesIn(zip: Uint8Array, depth = 0): { name: string; text: string }[] {
+const NOT_RECOGNISED = `We didn't recognise that file. Right now we can read data downloads from ${readySources
+  .map((s) => s.name)
+  .join(', ')}. More supermarkets are coming soon.`
+
+// Accepts a data file, or a .zip containing one, and works out which supermarket it's from.
+export async function readUpload(upload: File): Promise<LoadedData> {
+  const bytes = new Uint8Array(await upload.arrayBuffer())
+  const isZip = bytes[0] === 0x50 && bytes[1] === 0x4b // every zip starts with "PK"
+  const files = isZip ? filesIn(bytes) : [{ name: upload.name, text: new TextDecoder().decode(bytes) }]
+  if (!files.length) throw new Error("That zip doesn't contain any data files we can read.")
+  return identify(files)
+}
+
+/** Tries every supermarket's converter on every file until one recognises it. */
+export function identify(files: UploadedFile[]): LoadedData {
+  // Likely names first ("...transactions.json"), so the right file wins quickly.
+  const ordered = [...files].sort((a, b) => Number(/transaction|purchase|receipt/i.test(b.name)) - Number(/transaction|purchase|receipt/i.test(a.name)))
+  for (const file of ordered)
+    for (const source of readySources) {
+      const shops = source.read!(file)
+      if (shops) return { source, shops, file }
+    }
+  throw new Error(NOT_RECOGNISED)
+}
+
+function filesIn(zip: Uint8Array, depth = 0): UploadedFile[] {
   let entries: Record<string, Uint8Array>
   try {
     entries = unzipSync(zip)
   } catch {
-    throw new Error("We couldn't open that zip file. If it's password protected, unzip it first and upload the .json file inside.")
+    throw new Error("We couldn't open that zip file. If it's password protected, unzip it first and upload the file inside.")
   }
   return Object.entries(entries).flatMap(([name, data]) => {
-    if (/\.json$/i.test(name)) return [{ name, text: strFromU8(data) }]
-    if (/\.zip$/i.test(name) && depth < 2) return jsonFilesIn(data, depth + 1) // zips inside zips
+    if (/\.(json|csv|txt)$/i.test(name)) return [{ name, text: strFromU8(data) }]
+    if (/\.zip$/i.test(name) && depth < 2) return filesIn(data, depth + 1) // zips inside zips
     return []
   })
-}
-
-function readJson(text: string): { shops: Shop[]; json: string } {
-  let data: unknown
-  try {
-    data = JSON.parse(text)
-  } catch {
-    throw new Error("That file isn't valid JSON. Upload the .json or .zip file from your Tesco data download.")
-  }
-  return { shops: parseExport(data), json: text }
 }

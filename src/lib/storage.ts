@@ -1,9 +1,11 @@
-// Keeps the uploaded export in this browser (IndexedDB) so returning visitors
-// don't have to upload again. Nothing is sent anywhere. Every call fails
-// quietly: private browsing or blocked storage just means "not remembered".
-const DB = 'tesco-wrapped'
+// Keeps the uploaded data file in this browser (IndexedDB) so returning
+// visitors don't have to upload again. Nothing is sent anywhere. Every call
+// fails quietly: private browsing or blocked storage just means "not remembered".
+import type { UploadedFile } from '../sources'
+
+const DB = 'aisle-be-back'
 const STORE = 'files'
-const KEY = 'export'
+const KEY = 'upload'
 
 function open(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -27,6 +29,6 @@ async function run<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRe
   }
 }
 
-export const saveExport = (json: string) => run('readwrite', (s) => s.put(json, KEY))
-export const loadExport = () => run<string>('readonly', (s) => s.get(KEY))
-export const forgetExport = () => run('readwrite', (s) => s.delete(KEY))
+export const saveUpload = (file: UploadedFile) => run('readwrite', (s) => s.put(file, KEY))
+export const loadUpload = () => run<UploadedFile>('readonly', (s) => s.get(KEY))
+export const forgetUpload = () => run('readwrite', (s) => s.delete(KEY))

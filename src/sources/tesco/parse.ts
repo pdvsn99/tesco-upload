@@ -1,33 +1,9 @@
-// Turns the raw Tesco data export into a clean, predictable shape.
+// Turns Tesco's data export into the shared Shop/Item shape (see lib/types.ts).
 // The export is messy (mixed casing, missing names, refunds, old till-receipt
 // abbreviations) so everything defensive lives here.
 
+import type { Item, PaymentMethod, Shop } from '../../lib/types'
 import { linkOldNames } from './linkNames'
-
-export type PaymentMethod = 'card' | 'cash' | 'giftcard' | 'other'
-
-export interface Item {
-  name: string
-  rawName: string // exactly as it appears in the export
-  fromTill: boolean // an old-style SHOUTY till-receipt name (before ~2019)
-  key: string // normalised name used for grouping
-  quantity: number
-  unitPrice: number
-  lineTotal: number
-  isFuel: boolean
-  litres: number
-  isMystery: boolean // no product name in the export
-  weighed: boolean // sold by weight, so the price depends on how much you took
-}
-
-export interface Shop {
-  date: Date
-  channel: 'store' | 'online'
-  total: number
-  savings: number
-  items: Item[]
-  payments: { method: PaymentMethod; brand: string; amount: number }[]
-}
 
 const num = (v: unknown): number => {
   const n = typeof v === 'number' ? v : parseFloat(String(v ?? ''))

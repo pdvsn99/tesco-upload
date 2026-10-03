@@ -1,4 +1,4 @@
-import type { Item } from './parse'
+import type { Item } from './types'
 
 // Each item is put in the first category whose keywords match its name.
 // Order matters: "ice cream" must win before "cream" counts as dairy.
@@ -26,9 +26,9 @@ export interface Persona {
 }
 
 const PERSONAS: Record<string, Omit<Persona, 'id'>> = {
-  fuel: { title: 'The Forecourt Regular', emoji: '⛽', blurb: 'Half your Tesco life happens at the pump. Clubcard points on petrol? Smart.' },
+  fuel: { title: 'The Forecourt Regular', emoji: '⛽', blurb: 'Half your supermarket life happens at the pump. Points on petrol? Smart.' },
   icecream: { title: 'The Ice Cream Devotee', emoji: '🍦', blurb: 'The freezer aisle knows you by name. Rain or shine, there is always room for a tub.' },
-  mealdeal: { title: 'The Meal Deal Legend', emoji: '🥪', blurb: 'Sandwich, snack, drink. You have the £3.85 combo down to a fine art.' },
+  mealdeal: { title: 'The Meal Deal Legend', emoji: '🥪', blurb: 'Sandwich, snack, drink. The lunchtime combo is basically a lifestyle.' },
   caffeine: { title: 'The Caffeine Fiend', emoji: '☕', blurb: 'Coffee, energy drinks, tea bags by the hundred. Sleep is optional.' },
   freezer: { title: 'The Freezer Raider', emoji: '🧊', blurb: 'Pizzas, chips, nuggets. If it goes in the oven from frozen, it goes in your basket.' },
   booze: { title: 'The Party Planner', emoji: '🍻', blurb: 'Someone has to bring the drinks, and that someone is clearly you.' },

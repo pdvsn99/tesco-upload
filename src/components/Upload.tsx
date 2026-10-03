@@ -1,12 +1,10 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import { delay } from '../lib/ui'
-import type { Shop } from '../lib/parse'
-import { readExportFile } from '../lib/readFile'
-import { forgetExport, saveExport } from '../lib/storage'
+import { readUpload, type LoadedData } from '../lib/readFile'
+import { forgetUpload, saveUpload } from '../lib/storage'
+import { comingSoonSources, readySources } from '../sources'
 
-const TESCO_DATA_PAGE = 'https://www.tesco.com/account/data-portability/en-GB/'
-
-export function Upload({ onLoaded }: { onLoaded: (shops: Shop[], remembered: boolean) => void }) {
+export function Upload({ onLoaded }: { onLoaded: (data: LoadedData, remembered: boolean) => void }) {
   const input = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -18,9 +16,9 @@ export function Upload({ onLoaded }: { onLoaded: (shops: Shop[], remembered: boo
     setError(null)
     setBusy(true)
     try {
-      const { shops, json } = await readExportFile(file)
-      await (remember ? saveExport(json) : forgetExport())
-      onLoaded(shops, remember)
+      const data = await readUpload(file)
+      await (remember ? saveUpload(data.file) : forgetUpload())
+      onLoaded(data, remember)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong reading that file.')
     } finally {
@@ -31,14 +29,24 @@ export function Upload({ onLoaded }: { onLoaded: (shops: Shop[], remembered: boo
   return (
     <main className="screen screen-upload">
       <div className="upload-inner">
-        <p className="eyebrow rise">Your year in baskets</p>
+        <p className="eyebrow rise">Your supermarket year, unpacked</p>
         <h1 className="logo rise" style={delay(80)}>
-          Tesco<br />
-          <span>Wrapped</span>
+          Aisle<br />
+          <span>Be Back</span>
         </h1>
         <p className="lede rise" style={delay(160)}>
-          Upload your Tesco shopping history and we'll turn it into a story about how you shop.
+          Upload your supermarket shopping history and we'll turn it into a story about how you shop.
         </p>
+
+        <div className="shops rise" style={delay(200)}>
+          {readySources.map((s) => (
+            <span key={s.id} className="shop-chip is-ready" style={{ '--chip': s.colors.brand } as CSSProperties}>✓ {s.name}</span>
+          ))}
+          {comingSoonSources.map((s) => (
+            <span key={s.id} className="shop-chip">{s.name}</span>
+          ))}
+          <span className="shops-note">Greyed out = coming soon</span>
+        </div>
 
         <button
           type="button"
@@ -58,13 +66,13 @@ export function Upload({ onLoaded }: { onLoaded: (shops: Shop[], remembered: boo
           disabled={busy}
         >
           <span className="dropzone-icon" aria-hidden>🛒</span>
-          <strong>{busy ? 'Reading your receipts…' : 'Choose your Tesco data file'}</strong>
-          <span>The .zip Tesco sends you, or the .json inside it</span>
+          <strong>{busy ? 'Reading your receipts…' : 'Choose your data file'}</strong>
+          <span>The .zip your supermarket sends you, or the file inside it</span>
         </button>
         <input
           ref={input}
           type="file"
-          accept=".json,.zip,application/json,application/zip"
+          accept=".json,.zip,.csv,application/json,application/zip,text/csv"
           hidden
           onChange={(e) => {
             read(e.target.files?.[0])
@@ -79,28 +87,20 @@ export function Upload({ onLoaded }: { onLoaded: (shops: Shop[], remembered: boo
 
         {error && <p className="error" role="alert">{error}</p>}
 
-        <details className="howto rise" style={delay(320)}>
-          <summary>How do I get my Tesco data?</summary>
-          <p className="howto-note">It's free and takes a few minutes. Tesco usually emails you within a few hours (up to 48).</p>
-          <ol>
-            <li>
-              Go to Tesco's <a href={TESCO_DATA_PAGE} target="_blank" rel="noreferrer">data portability page</a>, or sign in at
-              tesco.com and open <strong>My account → My details → Request your Tesco data</strong>.
-            </li>
-            <li>Tap <strong>Start your request</strong>. Tesco texts a code to your phone to check it's you.</li>
-            <li>Wait for the email from Tesco saying your data is ready, then download it. You may need the code again.</li>
-            <li>Upload the download here. The .zip file is fine, no need to unzip it.</li>
-          </ol>
-          <p className="howto-note">
-            Don't have an online account? Register your Clubcard at tesco.com first, or call Tesco on 0800 917 6895.
-          </p>
-        </details>
+        {readySources.map((s) => s.howTo && (
+          <details key={s.id} className="howto rise" style={delay(320)}>
+            <summary>How do I get my {s.name} data?</summary>
+            <p className="howto-note">It's free and takes a few minutes.</p>
+            <ol>{s.howTo.steps.map((step, i) => <li key={i}>{step}</li>)}</ol>
+            {s.howTo.notes?.map((note, i) => <p key={i} className="howto-note">{note}</p>)}
+          </details>
+        ))}
 
         <p className="privacy rise" style={delay(400)}>
           🔒 Your data never leaves your device. Everything is worked out in your browser.
         </p>
       </div>
-      <footer className="disclaimer">A fan-made project. Not affiliated with or endorsed by Tesco.</footer>
+      <footer className="disclaimer">A fan-made project. Not affiliated with or endorsed by any supermarket.</footer>
     </main>
   )
 }
