@@ -5,3 +5,27 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Everyone visiting aisle.be ends up at aisle.be/back ("Aisle Be Back").
+# Rules are checked top to bottom; the first match wins.
+
+# Show the app at /back (the address bar keeps saying /back).
+[[redirects]]
+  from = "/back"
+  to = "/index.html"
+  status = 200
+
+# The plain homepage goes to /back. "force" is needed because a real
+# homepage file exists, and Netlify would otherwise serve that instead.
+[[redirects]]
+  from = "/"
+  to = "/back"
+  status = 301
+  force = true
+
+# Any other address also goes to /back. Without "force", real files the
+# app needs (its code, styles and icon) still load normally.
+[[redirects]]
+  from = "/*"
+  to = "/back"
+  status = 301
