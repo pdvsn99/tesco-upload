@@ -1,0 +1,261 @@
+import type { ReactNode } from 'react'
+import { Bars } from '../components/Bars'
+import { CountUp } from '../components/CountUp'
+import { SummaryCard } from '../components/SummaryCard'
+import { count, date, hourRange, money, moneyRound, percent, plural, time } from '../lib/format'
+import { DAYS, type Stats } from '../lib/stats'
+import { delay } from '../lib/ui'
+
+export type Theme = 'blue' | 'red' | 'navy' | 'white' | 'yellow' | 'sky'
+
+export interface Slide {
+  id: string
+  theme: Theme
+  content: ReactNode
+}
+
+export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFile: () => void }): Slide[] {
+  const slides: Slide[] = []
+  const add = (id: string, theme: Theme, content: ReactNode) => slides.push({ id, theme, content })
+
+  add('intro', 'blue', (
+    <>
+      <p className="eyebrow rise">Tesco Wrapped</p>
+      <h1 className="huge rise" style={delay(150)}>{s.isAllTime ? 'All time' : s.periodLabel}</h1>
+      <p className="lede rise" style={delay(400)}>
+        Every receipt, every meal deal, every “I only came in for milk”. Let's see what your baskets say about you.
+      </p>
+      <p className="hint rise" style={delay(900)}>Tap to continue →</p>
+    </>
+  ))
+
+  add('trips', 'red', (
+    <>
+      <p className="lede rise">{s.isAllTime ? `Since ${date(s.first)}` : `${s.periodHeading[0].toUpperCase()}${s.periodHeading.slice(1)}`} you popped into Tesco</p>
+      <h1 className="huge rise" style={delay(150)}>
+        <CountUp value={s.trips} format={count} />
+      </h1>
+      <p className="big rise" style={delay(300)}>times</p>
+      <p className="lede rise" style={delay(900)}>
+        That's about once every <strong>{count(Math.max(1, s.daysPerTrip))} days</strong>.
+        {s.onlineTrips > 0 && ` ${plural(s.onlineTrips, 'was an online order', 'were online orders')}.`}
+      </p>
+    </>
+  ))
+
+  add('spend', 'navy', (
+    <>
+      <p className="lede rise">All in, you spent</p>
+      <h1 className="huge rise" style={delay(150)}>
+        <CountUp value={s.spend} format={moneyRound} />
+      </h1>
+      <p className="lede rise" style={delay(800)}>
+        Your average basket came to <strong>{money(s.avgBasket)}</strong>, which makes you a…
+      </p>
+      <p className="badge rise" style={delay(1100)}>{s.shopper.title}</p>
+      <p className="small rise" style={delay(1250)}>{s.shopper.blurb}</p>
+    </>
+  ))
+
+  if (s.isAllTime && s.byYear.length > 1) {
+    const top = s.byYear.reduce((a, y, i) => (y.spend > s.byYear[a].spend ? i : a), 0)
+    add('years', 'sky', (
+      <>
+        <p className="lede rise">Year by year</p>
+        <h2 className="title rise" style={delay(150)}>
+          {s.byYear[top].year} was your biggest year, with {moneyRound(s.byYear[top].spend)} across {plural(s.byYear[top].trips, 'shop')}.
+        </h2>
+        <Bars values={s.byYear.map((y) => y.spend)} labels={s.byYear.map((y) => `’${String(y.year).slice(2)}`)} highlight={top} />
+      </>
+    ))
+  }
+
+  if (s.savings > 0) {
+    add('savings', 'yellow', (
+      <>
+        <p className="lede rise">Clubcard prices and offers saved you</p>
+        <h1 className="huge rise" style={delay(150)}>
+          <CountUp value={s.savings} format={money} />
+        </h1>
+        <p className="lede rise" style={delay(900)}>
+          That's <strong>{percent(s.savings / (s.spend + s.savings))}</strong> knocked off everything you bought. Nice work.
+        </p>
+      </>
+    ))
+  }
+
+  const big = s.biggestShop
+  const bigItems = [...big.items].filter((i) => i.quantity > 0 && !i.isMystery).sort((a, b) => b.lineTotal - a.lineTotal).slice(0, 3)
+  add('biggest', 'red', (
+    <>
+      <p className="lede rise">Your biggest shop was on</p>
+      <h2 className="title rise" style={delay(150)}>{date(big.date)}</h2>
+      <h1 className="huge rise" style={delay(300)}>
+        <CountUp value={big.total} format={money} delay={500} />
+      </h1>
+      <p className="lede rise" style={delay(900)}>
+        {plural(big.items.reduce((a, i) => a + Math.max(0, Math.round(i.quantity) || 1), 0), 'item')} in the basket
+        {bigItems.length > 0 && ', including:'}
+      </p>
+      {bigItems.length > 0 && (
+        <ul className="chips rise" style={delay(1100)}>
+          {bigItems.map((i) => <li key={i.key}>{i.name}</li>)}
+        </ul>
+      )}
+    </>
+  ))
+
+  if (s.priciestItem) {
+    add('priciest', 'white', (
+      <>
+        <p className="lede rise">The single most expensive thing you bought?</p>
+        <h2 className="title rise" style={delay(300)}>{s.priciestItem.item.name}</h2>
+        <h1 className="huge rise" style={delay(600)}>{money(s.priciestItem.item.unitPrice)}</h1>
+        <p className="small rise" style={delay(900)}>Bought on {date(s.priciestItem.date)}. Treat yourself.</p>
+      </>
+    ))
+  }
+
+  add('items', 'blue', (
+    <>
+      <p className="lede rise">You carried home</p>
+      <h1 className="huge rise" style={delay(150)}>
+        <CountUp value={s.itemCount} format={count} />
+      </h1>
+      <p className="big rise" style={delay(300)}>items</p>
+      <p className="lede rise" style={delay(900)}>
+        from <strong>{count(s.uniqueProducts)}</strong> different products.
+      </p>
+    </>
+  ))
+
+  if (s.topProducts.length >= 3) {
+    add('top', 'navy', (
+      <>
+        <p className="lede rise">Your top products</p>
+        <ol className="toplist">
+          {s.topProducts.map((p, i) => (
+            <li key={p.name} className="rise" style={delay(250 + i * 180)}>
+              <span className="rank">{i + 1}</span>
+              <span className="top-name">{p.name}</span>
+              <span className="top-count">×{p.count}</span>
+            </li>
+          ))}
+        </ol>
+      </>
+    ))
+
+    const sig = s.topProducts[0]
+    add('signature', 'red', (
+      <>
+        <p className="lede rise">Your signature item is…</p>
+        <h1 className="title xl rise" style={delay(600)}>{sig.name}</h1>
+        <p className="lede rise" style={delay(1200)}>
+          You bought it <strong>{plural(sig.count, 'time')}</strong>, spending {money(sig.spend)}. We think you might be a bit obsessed.
+        </p>
+        {s.topBySpend && s.topBySpend.name !== sig.name && (
+          <p className="small rise" style={delay(1600)}>
+            But your biggest money pit was <strong>{s.topBySpend.name}</strong>, at {money(s.topBySpend.spend)}.
+          </p>
+        )}
+      </>
+    ))
+  }
+
+  add('when', 'sky', (
+    <>
+      <p className="lede rise">Your favourite day to shop is</p>
+      <h1 className="huge rise" style={{ ...delay(150), fontSize: `${Math.min(88, Math.floor(440 / (s.favouriteDay.length + 1)))}px` }}>
+        {s.favouriteDay}s
+      </h1>
+      <p className="lede rise" style={delay(350)}>
+        usually {s.timeOfDay}. Your peak hour is <strong>{hourRange(s.favouriteHour)}</strong>.
+      </p>
+      <Bars values={s.weekdayTrips} labels={DAYS.map((d) => d.slice(0, 1))} highlight={DAYS.indexOf(s.favouriteDay)} />
+    </>
+  ))
+
+  add('month', 'white', (
+    <>
+      <p className="lede rise">Your busiest month was</p>
+      <h1 className="title xl rise" style={delay(150)}>{s.busiestMonth.label}</h1>
+      <p className="lede rise" style={delay(400)}>
+        {plural(s.busiestMonth.trips, 'shop')} and {money(s.busiestMonth.spend)} spent.
+      </p>
+      {s.longestGap && s.longestGap.days > 1 && (
+        <p className="lede rise" style={delay(900)}>
+          But between {date(s.longestGap.from)} and {date(s.longestGap.to)} you went <strong>{plural(s.longestGap.days, 'day')}</strong> without a single Tesco trip. Were you okay?
+        </p>
+      )}
+    </>
+  ))
+
+  const owl = s.lateNight / s.trips
+  add('clock', 'navy', (
+    <>
+      <p className="lede rise">{owl >= 0.15 ? 'A certified night owl 🦉' : 'Early bird or night owl?'}</p>
+      <h1 className="huge rise" style={delay(150)}>
+        <CountUp value={s.lateNight} format={count} />
+      </h1>
+      <p className="lede rise" style={delay(300)}>{s.lateNight === 1 ? 'shop' : 'shops'} after 9pm</p>
+      <div className="duo rise" style={delay(800)}>
+        <div>
+          <span className="small">Earliest visit</span>
+          <strong>{time(s.earliest)}</strong>
+          <span className="small">{date(s.earliest)}</span>
+        </div>
+        <div>
+          <span className="small">Latest visit</span>
+          <strong>{time(s.latest)}</strong>
+          <span className="small">{date(s.latest)}</span>
+        </div>
+      </div>
+    </>
+  ))
+
+  if (s.cardShare + s.cashShare > 0) {
+    const cardWins = s.cardShare >= s.cashShare
+    add('pay', 'blue', (
+      <>
+        <p className="lede rise">Cash or card?</p>
+        <h1 className="huge rise" style={delay(150)}>{percent(cardWins ? s.cardShare : s.cashShare)}</h1>
+        <p className="lede rise" style={delay(300)}>of your spending was by {cardWins ? 'card' : 'cash'}.</p>
+        <div className="split rise" style={delay(600)}>
+          <div className="split-card" style={{ flexGrow: Math.max(s.cardShare, 0.02) }}>Card</div>
+          <div className="split-cash" style={{ flexGrow: Math.max(s.cashShare, 0.02) }}>Cash</div>
+        </div>
+        {s.topCardBrand && (
+          <p className="small rise" style={delay(900)}>Most used: {s.topCardBrand}</p>
+        )}
+      </>
+    ))
+  }
+
+  if (s.fuelLitres > 0) {
+    add('fuel', 'red', (
+      <>
+        <p className="lede rise">And at the pump…</p>
+        <h1 className="huge rise" style={delay(150)}>
+          <CountUp value={s.fuelLitres} format={count} />
+        </h1>
+        <p className="big rise" style={delay(300)}>litres</p>
+        <p className="lede rise" style={delay(800)}>of fuel across {plural(s.fuelVisits, 'fill-up')}. ⛽</p>
+      </>
+    ))
+  }
+
+  add('persona', 'yellow', (
+    <>
+      <p className="lede rise">Put it all together and you are…</p>
+      <div className="persona-emoji rise" style={delay(700)}>{s.persona.emoji}</div>
+      <h1 className="title xl rise" style={delay(900)}>{s.persona.title}</h1>
+      <p className="lede rise" style={delay(1300)}>{s.persona.blurb}</p>
+    </>
+  ))
+
+  add('summary', 'blue', (
+    <SummaryCard stats={s} onRestart={actions.onRestart} onNewFile={actions.onNewFile} />
+  ))
+
+  return slides
+}
