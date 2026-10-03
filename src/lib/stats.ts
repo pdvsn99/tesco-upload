@@ -1,5 +1,6 @@
 import type { Item, Shop } from './parse'
-import { pickPersona, shopperType } from './persona'
+import { carrierBags, christmas, habits, priceCheck, seasons, thenVsNow } from './extras'
+import { pickPersona, shopperType, timeBadge } from './persona'
 
 export type PeriodId = 'all' | '12m' | `y${number}`
 
@@ -81,6 +82,14 @@ export interface Stats {
   byYear: { year: number; spend: number; trips: number }[]
   persona: ReturnType<typeof pickPersona>
   shopper: ReturnType<typeof shopperType>
+  vibe: ReturnType<typeof timeBadge>
+  firstShop: Shop
+  priceCheck: ReturnType<typeof priceCheck>
+  habits: ReturnType<typeof habits>
+  thenVsNow: ReturnType<typeof thenVsNow>
+  seasons: ReturnType<typeof seasons>
+  christmas: ReturnType<typeof christmas>
+  bags: ReturnType<typeof carrierBags>
 }
 
 export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -94,7 +103,7 @@ function argMax(values: number[]): number {
   return values.reduce((best, v, i) => (v > values[best] ? i : best), 0)
 }
 
-export function computeStats(shops: Shop[], period: Period, now = new Date()): Stats | null {
+export function computeStats(shops: Shop[], period: Period, all: Shop[], now = new Date()): Stats | null {
   if (!shops.length) return null
   const trips = shops.length
   const spend = shops.reduce((a, s) => a + s.total, 0)
@@ -179,6 +188,7 @@ export function computeStats(shops: Shop[], period: Period, now = new Date()): S
   }
   spanDays = Math.max(1, spanDays)
   const avgBasket = spend / trips
+  const shopHabits = habits(shops)
 
   return {
     periodLabel: period.label,
@@ -217,5 +227,13 @@ export function computeStats(shops: Shop[], period: Period, now = new Date()): S
     byYear: [...years.values()].sort((a, b) => a.year - b.year),
     persona: pickPersona(bought),
     shopper: shopperType(avgBasket),
+    vibe: timeBadge(shopHabits),
+    firstShop: shops[0],
+    priceCheck: priceCheck(all, shops),
+    habits: shopHabits,
+    thenVsNow: thenVsNow(all, shops, period.id, now),
+    seasons: seasons(shops),
+    christmas: christmas(shops),
+    bags: carrierBags(shops),
   }
 }

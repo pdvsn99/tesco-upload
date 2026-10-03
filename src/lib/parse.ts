@@ -13,6 +13,7 @@ export interface Item {
   isFuel: boolean
   litres: number
   isMystery: boolean // no product name in the export
+  weighed: boolean // sold by weight, so the price depends on how much you took
 }
 
 export interface Shop {
@@ -88,6 +89,7 @@ function parseItem(raw: Record<string, unknown>): Item {
     isFuel,
     litres: isFuel ? volume : 0,
     isMystery: !rawName && !isFuel,
+    weighed: num(raw.weight) > 0,
   }
 }
 

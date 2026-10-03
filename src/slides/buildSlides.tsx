@@ -46,6 +46,21 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
     </>
   ))
 
+  const firstItems = s.firstShop.items.filter((i) => i.quantity > 0 && !i.isMystery).slice(0, 4)
+  if (firstItems.length) {
+    add('first', 'white', (
+      <>
+        <p className="lede rise">{s.isAllTime ? 'Your first ever Tesco receipt' : `Your first shop ${s.periodHeading}`} was on</p>
+        <h2 className="title xl rise" style={delay(150)}>{date(s.firstShop.date)}</h2>
+        <p className="lede rise" style={delay(500)}>at {time(s.firstShop.date)}, and in the basket was:</p>
+        <ul className="chips rise" style={delay(800)}>
+          {firstItems.map((i, n) => <li key={`${i.key}-${n}`}>{i.name}</li>)}
+        </ul>
+        <p className="small rise" style={delay(1100)}>Where it all began.</p>
+      </>
+    ))
+  }
+
   add('spend', 'navy', (
     <>
       <p className="lede rise">All in, you spent</p>
@@ -73,6 +88,27 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
     ))
   }
 
+  const cmp = s.thenVsNow?.compare
+  if (cmp) {
+    const up = cmp.spendChange >= 0
+    add('compare', 'red', (
+      <>
+        <p className="lede rise">Compared with {cmp.label}, you spent</p>
+        <h1 className="huge rise" style={fit(percent(Math.abs(cmp.spendChange)), 150)}>
+          {percent(Math.abs(cmp.spendChange))}
+        </h1>
+        <p className="big rise" style={delay(300)}>{up ? 'more' : 'less'}</p>
+        <p className="lede rise" style={delay(500)}>
+          That's {moneyRound(s.spend)}, compared with {moneyRound(cmp.prevSpend)}.
+        </p>
+        <p className="lede rise" style={delay(800)}>
+          And you went to Tesco <strong>{plural(s.trips, 'time')}</strong>, against {count(cmp.prevTrips)} before.{' '}
+          {cmp.tripsChange > 0.1 ? 'Somebody likes it here.' : cmp.tripsChange < -0.1 ? 'Playing hard to get?' : 'Steady as she goes.'}
+        </p>
+      </>
+    ))
+  }
+
   if (s.savings > 0) {
     add('savings', 'yellow', (
       <>
@@ -83,6 +119,27 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
         <p className="lede rise" style={delay(900)}>
           That's <strong>{percent(s.savings / (s.spend + s.savings))}</strong> knocked off everything you bought. Nice work.
         </p>
+      </>
+    ))
+  }
+
+  if (s.priceCheck) {
+    const pc = s.priceCheck
+    add('prices', 'white', (
+      <>
+        <p className="lede rise">Price check! Your regulars have gone {pc.average >= 0 ? 'up' : 'down'} by an average of</p>
+        <h1 className="huge rise" style={fit(percent(Math.abs(pc.average)), 150)}>{percent(Math.abs(pc.average))}</h1>
+        <ul className="pricelist">
+          {pc.items.map((p, i) => (
+            <li key={p.name} className="rise" style={delay(500 + i * 180)}>
+              <span className="price-name">{p.name}</span>
+              <span className="price-then">{money(p.fromPrice)} <small>{p.fromYear}</small></span>
+              <span className="price-arrow" aria-hidden>→</span>
+              <span className="price-now">{money(p.toPrice)} <small>{p.toYear}</small></span>
+            </li>
+          ))}
+        </ul>
+        <p className="small rise" style={delay(1300)}>Same product, what you paid near your first and latest buys.</p>
       </>
     ))
   }
@@ -165,6 +222,31 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
     ))
   }
 
+  const tvn = s.thenVsNow
+  if (tvn && (tvn.newFaves.length || tvn.gone.length)) {
+    add('newgone', 'blue', (
+      <>
+        {tvn.newFaves.length > 0 && (
+          <>
+            <p className="lede rise">New in your basket ✨</p>
+            <ul className="chips rise" style={delay(200)}>
+              {tvn.newFaves.map((t) => <li key={t.name}>{t.name} ×{t.count}</li>)}
+            </ul>
+          </>
+        )}
+        {tvn.gone.length > 0 && (
+          <>
+            <p className="lede rise" style={delay(600)}>{tvn.goneLabel} 💔</p>
+            <ul className="chips chips-faded rise" style={delay(800)}>
+              {tvn.gone.map((t) => <li key={t.name}>{t.name}</li>)}
+            </ul>
+            <p className="small rise" style={delay(1100)}>Was it something they said?</p>
+          </>
+        )}
+      </>
+    ))
+  }
+
   add('when', 'sky', (
     <>
       <p className="lede rise">Your favourite day to shop is</p>
@@ -175,6 +257,34 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
         usually {s.timeOfDay}. Your peak hour is <strong>{hourRange(s.favouriteHour)}</strong>.
       </p>
       <Bars values={s.weekdayTrips} labels={DAYS.map((d) => d.slice(0, 1))} highlight={DAYS.indexOf(s.favouriteDay)} />
+    </>
+  ))
+
+  const h = s.habits
+  add('habits', 'red', (
+    <>
+      <p className="lede rise">Forgot something?</p>
+      <h1 className="huge rise" style={fit(count(h.returnTrips), 150)}>
+        <CountUp value={h.returnTrips} format={count} />
+      </h1>
+      <p className="lede rise" style={delay(300)}>
+        times you went back to Tesco on a day you'd already been.
+        {h.busiestDay && <> Your record is <strong>{plural(h.busiestDay.trips, 'trip')}</strong> on {date(h.busiestDay.date)}.</>}
+      </p>
+      {h.streak.days > 1 && (
+        <div className="duo rise" style={delay(900)}>
+          <div>
+            <span className="small">Longest streak</span>
+            <strong>{plural(h.streak.days, 'day')}</strong>
+            <span className="small">in a row, ending {date(h.streak.to)}</span>
+          </div>
+          <div>
+            <span className="small">Weekend shops</span>
+            <strong>{percent(h.weekendShare)}</strong>
+            <span className="small">{h.weekendShare >= 0.4 ? 'Weekends are for Tesco' : 'Mostly a weekday shopper'}</span>
+          </div>
+        </div>
+      )}
     </>
   ))
 
@@ -193,10 +303,9 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
     </>
   ))
 
-  const owl = s.lateNight / s.trips
   add('clock', 'navy', (
     <>
-      <p className="lede rise">{owl >= 0.15 ? 'A certified night owl 🦉' : 'Early bird or night owl?'}</p>
+      <p className="lede rise">{s.vibe.title === 'Night Owl' ? 'A certified night owl 🦉' : 'Early bird or night owl?'}</p>
       <h1 className="huge rise" style={fit(count(s.lateNight), 150)}>
         <CountUp value={s.lateNight} format={count} />
       </h1>
@@ -216,6 +325,39 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
     </>
   ))
 
+  const topSeason = s.seasons.reduce((a, x) => (x.trips > a.trips ? x : a))
+  add('seasons', 'sky', (
+    <>
+      <p className="lede rise">Your favourite season to shop is {topSeason.emoji}</p>
+      <h1 className="huge rise" style={fit(topSeason.name, 150)}>{topSeason.name}</h1>
+      <div className="season-grid">
+        {s.seasons.map((x, i) => (
+          <div key={x.name} className={`rise ${x === topSeason ? 'is-top' : ''}`} style={delay(500 + i * 150)}>
+            <span className="small">{x.emoji} {x.name}</span>
+            <strong>{plural(x.trips, 'shop')}</strong>
+            {x.top && <span className="small">Top: {x.top}</span>}
+          </div>
+        ))}
+      </div>
+    </>
+  ))
+
+  if (s.christmas) {
+    const x = s.christmas
+    add('christmas', 'red', (
+      <>
+        <p className="lede rise">🎄 Christmas build-up (1st to 24th December)</p>
+        <h1 className="huge rise" style={fit(moneyRound(x.spend), 150)}>
+          <CountUp value={x.spend} format={moneyRound} />
+        </h1>
+        <p className="lede rise" style={delay(500)}>across {plural(x.trips, 'shop')}.</p>
+        <p className="lede rise" style={delay(900)}>
+          The big one was {money(x.biggest.total)} on {date(x.biggest.date)}. Ho ho ho.
+        </p>
+      </>
+    ))
+  }
+
   if (s.cardShare + s.cashShare > 0) {
     const cardWins = s.cardShare >= s.cashShare
     add('pay', 'blue', (
@@ -230,6 +372,21 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
         {s.topCardBrand && (
           <p className="small rise" style={delay(900)}>Most used: {s.topCardBrand}</p>
         )}
+      </>
+    ))
+  }
+
+  if (s.bags) {
+    add('bags', 'white', (
+      <>
+        <p className="lede rise">Forgot your bags again?</p>
+        <h1 className="huge rise" style={fit(count(s.bags.count), 150)}>
+          <CountUp value={s.bags.count} format={count} />
+        </h1>
+        <p className="lede rise" style={delay(300)}>
+          bags bought at the till, costing <strong>{money(s.bags.spend)}</strong>.
+        </p>
+        <p className="small rise" style={delay(800)}>There's probably a cupboard full of them somewhere.</p>
       </>
     ))
   }
@@ -253,6 +410,7 @@ export function buildSlides(s: Stats, actions: { onRestart: () => void; onNewFil
       <div className="persona-emoji rise" style={delay(700)}>{s.persona.emoji}</div>
       <h1 className="title xl rise" style={delay(900)}>{s.persona.title}</h1>
       <p className="lede rise" style={delay(1300)}>{s.persona.blurb}</p>
+      <p className="badge rise" style={delay(1700)}>{s.vibe.emoji} {s.vibe.title}</p>
     </>
   ))
 

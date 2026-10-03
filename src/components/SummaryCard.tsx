@@ -42,6 +42,7 @@ export function SummaryCard({ stats: s, onRestart, onNewFile }: {
     ['Items', count(s.itemCount)],
     ['Fave day', s.favouriteDay],
     ['Shopper', s.shopper.title],
+    ['Vibe', `${s.vibe.title} ${s.vibe.emoji}`],
   ]
 
   return (

@@ -223,3 +223,22 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn { border: 2px solid var(--fg); background: transparent; border-radius: 999px; padding: 14px 18px; font-weight: 800; }
 .btn-primary { background: var(--clubcard-yellow); border-color: var(--clubcard-yellow); color: var(--tesco-navy); }
 .btn:disabled { opacity: .6; }
+
+/* ---------- New slides ---------- */
+.chips-faded li { text-decoration: line-through; opacity: .75; }
+
+.pricelist { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pricelist li {
+  display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 4px 8px;
+  padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+.price-name { grid-column: 1 / -1; font-weight: 700; font-size: 14px; line-height: 1.25; }
+.price-then { opacity: .7; font-weight: 600; }
+.price-arrow { opacity: .6; }
+.price-now { font-weight: 800; color: var(--tesco-red); }
+.pricelist small { font-size: 11px; font-weight: 600; opacity: .7; }
+
+.season-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.season-grid > div { display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 14px; background: color-mix(in srgb, var(--fg) 12%, transparent); }
+.season-grid > div.is-top { background: var(--tesco-navy); }
+.season-grid strong { font-family: var(--font-display); font-size: 20px; }

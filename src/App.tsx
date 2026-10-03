@@ -15,7 +15,7 @@ export default function App() {
   const slides = useMemo(() => {
     const period = periods.find((p) => p.id === periodId)
     if (!shops || !period) return null
-    const stats = computeStats(filterShops(shops, period.id), period)
+    const stats = computeStats(filterShops(shops, period.id), period, shops)
     if (!stats) return null
     return buildSlides(stats, {
       onRestart: () => setPeriodId(null),
