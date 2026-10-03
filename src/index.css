@@ -1,24 +1,28 @@
 :root {
-  --tesco-blue: #00539f;
-  --tesco-red: #ee1c2e;
-  --tesco-navy: #002a5c;
-  --tesco-sky: #0099d8;
-  --clubcard-yellow: #ffd400;
+  /* House style: Aisle Be Back's own colours */
+  --ink: #1c1a33;
+  --paper: #fff6e8;
+  --pop: #ffc23d;
+  --house: #e8492f;
+  --house-2: #0f766e;
+  /* Supermarket accents. App.tsx overrides these with the shop's own colours
+     once it knows which supermarket the data came from. */
+  --brand: var(--house);
+  --brand-2: var(--house-2);
   --white: #ffffff;
-  --ink: #0b1f3a;
 
   --font-display: 'Archivo Black', 'Arial Black', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   font-family: var(--font-body);
   color: var(--white);
-  background: var(--tesco-navy);
+  background: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
 
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; min-height: 100%; height: 100%; }
-body { background: var(--tesco-navy); }
+body { background: var(--ink); }
 button { font: inherit; color: inherit; cursor: pointer; }
 .tabular { font-variant-numeric: tabular-nums; }
 
@@ -44,14 +48,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
   justify-content: center;
   padding: 32px 20px;
   background:
-    radial-gradient(circle at 85% 10%, rgba(238, 28, 46, .9) 0 90px, transparent 91px),
-    radial-gradient(circle at 10% 95%, rgba(0, 153, 216, .55) 0 160px, transparent 161px),
-    var(--tesco-blue);
+    radial-gradient(circle at 85% 10%, var(--house) 0 90px, transparent 91px),
+    radial-gradient(circle at 10% 95%, color-mix(in srgb, var(--house-2) 70%, transparent) 0 160px, transparent 161px),
+    var(--ink);
 }
 .upload-inner { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 18px; }
 .eyebrow { margin: 0; text-transform: uppercase; letter-spacing: .14em; font-size: 13px; font-weight: 700; opacity: .85; }
 .logo { margin: 0; font-family: var(--font-display); font-size: clamp(56px, 16vw, 84px); line-height: .9; letter-spacing: -.02em; }
-.logo span { color: var(--clubcard-yellow); }
+.logo span { color: var(--pop); }
 .lede { margin: 0; font-size: 18px; line-height: 1.45; }
 .title { margin: 0; font-family: var(--font-display); font-size: clamp(28px, 8vw, 38px); line-height: 1.05; }
 .title.xl { font-size: clamp(34px, 10vw, 48px); }
@@ -64,38 +68,40 @@ button { font: inherit; color: inherit; cursor: pointer; }
   background: rgba(255, 255, 255, .08);
   transition: background .2s, border-color .2s, transform .2s;
 }
-.dropzone:hover, .dropzone.is-dragging { background: rgba(255, 255, 255, .18); border-color: var(--clubcard-yellow); transform: scale(1.02); }
+.dropzone:hover, .dropzone.is-dragging { background: rgba(255, 255, 255, .18); border-color: var(--pop); transform: scale(1.02); }
 .dropzone strong { font-size: 18px; }
 .dropzone span { font-size: 14px; opacity: .85; }
-.dropzone-icon { font-size: 40px; opacity: 1 !important; }
+.dropzone .dropzone-icon { font-size: 40px; line-height: 1; opacity: 1; }
 
-.error { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--white); color: var(--tesco-red); font-weight: 600; }
-.howto { background: rgba(0, 0, 0, .15); border-radius: 14px; padding: 12px 16px; font-size: 15px; }
-.howto summary { cursor: pointer; font-weight: 700; }
-.howto ol { margin: 10px 0 0; padding-left: 20px; line-height: 1.6; }
+.error { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--paper); color: var(--house); font-weight: 600; }
 .privacy { margin: 0; font-size: 14px; opacity: .9; }
 .disclaimer { margin-top: 28px; font-size: 12px; opacity: .6; text-align: center; }
 
 .pick-main { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .pick-big, .pick-year {
-  border: 0; border-radius: 18px; background: var(--white); color: var(--tesco-blue);
+  border: 0; border-radius: 18px; background: var(--paper); color: var(--ink);
   display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left;
   transition: transform .15s, background .15s;
 }
 .pick-big { padding: 20px 16px; min-height: 120px; justify-content: flex-end; }
 .pick-big strong { font-family: var(--font-display); font-size: 22px; line-height: 1.05; }
 .pick-big span, .pick-year span { font-size: 13px; color: var(--ink); opacity: .7; }
-.pick-big:hover, .pick-year:hover { transform: translateY(-3px); background: var(--clubcard-yellow); }
-.pick-big:disabled { opacity: .5; cursor: not-allowed; transform: none; background: var(--white); }
+.pick-big:hover, .pick-year:hover { transform: translateY(-3px); background: var(--pop); }
+.pick-big:disabled { opacity: .5; cursor: not-allowed; transform: none; background: var(--paper); }
 .pick-label { margin: 6px 0 0; font-weight: 700; }
 .pick-years { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
 .pick-year { padding: 12px; }
 .pick-year strong { font-family: var(--font-display); font-size: 20px; }
 .link-button { background: none; border: 0; padding: 8px 0; text-decoration: underline; opacity: .85; align-self: center; }
+.link-button.inline { padding: 0; font-size: inherit; }
+.pick-footer { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.remember { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.4; cursor: pointer; }
+.remember input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--pop); flex-shrink: 0; }
+.howto-note { margin: 10px 0 0; font-size: 14px; opacity: .9; }
 
 /* ---------- Story ---------- */
 .story {
-  --bg: var(--tesco-blue); --fg: var(--white); --accent: var(--clubcard-yellow); --shape: var(--tesco-red);
+  --bg: var(--brand); --fg: var(--white); --accent: var(--pop); --shape: var(--brand-2);
   position: fixed; inset: 0;
   display: flex; flex-direction: column;
   background: var(--bg); color: var(--fg);
@@ -103,19 +109,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
   overflow: hidden;
 }
 @media (min-width: 640px) {
-  body { background: #001634; }
+  body { background: #12111f; }
   .story {
     inset: auto; left: 50%; top: 50%; transform: translate(-50%, -50%);
     width: 420px; height: min(860px, calc(100dvh - 40px));
     border-radius: 28px; box-shadow: 0 30px 80px rgba(0, 0, 0, .45);
   }
 }
-.theme-blue   { --bg: var(--tesco-blue);  --fg: var(--white); --accent: var(--clubcard-yellow); --shape: var(--tesco-red); }
-.theme-red    { --bg: var(--tesco-red);   --fg: var(--white); --accent: var(--clubcard-yellow); --shape: var(--tesco-blue); }
-.theme-navy   { --bg: var(--tesco-navy);  --fg: var(--white); --accent: var(--clubcard-yellow); --shape: var(--tesco-sky); }
-.theme-sky    { --bg: var(--tesco-sky);   --fg: var(--white); --accent: var(--tesco-navy);     --shape: var(--clubcard-yellow); }
-.theme-white  { --bg: var(--white);       --fg: var(--tesco-blue); --accent: var(--tesco-red); --shape: var(--tesco-red); }
-.theme-yellow { --bg: var(--clubcard-yellow); --fg: var(--tesco-navy); --accent: var(--tesco-red); --shape: var(--tesco-blue); }
+.theme-brand  { --bg: var(--brand);   --fg: var(--white); --accent: var(--pop);   --shape: var(--brand-2); }
+.theme-brand2 { --bg: var(--brand-2); --fg: var(--white); --accent: var(--pop);   --shape: var(--brand); }
+.theme-ink    { --bg: var(--ink);     --fg: var(--white); --accent: var(--pop);   --shape: var(--house); }
+.theme-house  { --bg: var(--house);   --fg: var(--white); --accent: var(--ink);   --shape: var(--pop); }
+.theme-paper  { --bg: var(--paper);   --fg: var(--ink);   --accent: var(--brand-2); --shape: var(--brand); }
+.theme-pop    { --bg: var(--pop);     --fg: var(--ink);   --accent: var(--house); --shape: var(--brand); }
 
 .progress { position: absolute; z-index: 3; top: 12px; left: 12px; right: 52px; display: flex; gap: 4px; }
 .progress span { flex: 1; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--fg) 30%, transparent); overflow: hidden; position: relative; }
@@ -135,6 +141,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   position: relative; z-index: 2; flex: 1;
   display: flex; flex-direction: column; justify-content: center; gap: 14px;
   padding: 64px 28px 40px;
+  container-type: inline-size; /* lets .huge size itself to the slide width */
   overflow-y: auto;
 }
 
@@ -144,18 +151,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .shape-b { width: 140px; height: 140px; left: -50px; bottom: -40px; border-radius: 32px; background: var(--accent); opacity: .5; animation: float 11s ease-in-out infinite reverse; }
 @keyframes float { 50% { transform: translate(-14px, 18px) rotate(12deg); } }
 
-.huge { margin: 0; font-family: var(--font-display); font-size: clamp(56px, 18vw, 92px); line-height: .95; letter-spacing: -.02em; color: var(--accent); overflow-wrap: anywhere; }
-.theme-white .huge, .theme-yellow .huge { color: var(--tesco-red); }
+.huge { margin: 0; font-family: var(--font-display); font-size: clamp(56px, 18vw, 92px); line-height: .95; letter-spacing: -.02em; color: var(--accent); }
+.theme-paper .huge { color: var(--brand-2); }
+.theme-pop .huge { color: var(--ink); }
 .big { margin: -8px 0 0; font-family: var(--font-display); font-size: 32px; }
 .small { margin: 0; font-size: 14px; opacity: .85; line-height: 1.4; }
 .hint { margin: 24px 0 0; font-weight: 700; opacity: .7; }
 .lede strong { color: var(--accent); }
-.theme-white .lede strong { color: var(--tesco-red); }
+.theme-paper .lede strong { color: var(--brand-2); }
+.theme-pop .lede strong { color: var(--ink); text-decoration: underline; text-decoration-thickness: 3px; text-decoration-color: var(--house); }
 
 .badge {
   margin: 0; align-self: flex-start;
   padding: 8px 16px; border-radius: 999px;
-  background: var(--accent); color: var(--tesco-navy);
+  background: var(--accent); color: var(--ink);
   font-family: var(--font-display); font-size: 22px;
 }
 
@@ -167,7 +176,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 12px;
   padding: 12px 14px; border-radius: 16px; background: color-mix(in srgb, var(--fg) 10%, transparent);
 }
-.toplist li:first-child { background: var(--accent); color: var(--tesco-navy); }
+.toplist li:first-child { background: var(--accent); color: var(--ink); }
 .rank { font-family: var(--font-display); font-size: 28px; text-align: center; }
 .top-name { font-weight: 700; font-size: 15px; line-height: 1.25; }
 .top-count { font-family: var(--font-display); font-size: 18px; }
@@ -181,7 +190,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   animation: grow 700ms cubic-bezier(.2, .8, .2, 1) forwards;
 }
 .bar.is-top .bar-fill { background: var(--fg); }
-.theme-sky .bar.is-top .bar-fill { background: var(--tesco-navy); }
+.theme-house .bar.is-top .bar-fill { background: var(--ink); }
 .bar-label { font-size: 12px; font-weight: 700; }
 @keyframes grow { to { transform: scaleY(1); } }
 
@@ -191,8 +200,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .split { display: flex; height: 54px; border-radius: 14px; overflow: hidden; font-weight: 800; }
 .split > div { display: flex; align-items: center; padding: 0 12px; white-space: nowrap; overflow: hidden; }
-.split-card { background: var(--accent); color: var(--tesco-navy); }
-.split-cash { background: var(--tesco-red); color: var(--white); justify-content: flex-end; }
+.split-card { background: var(--accent); color: var(--ink); }
+.split-cash { background: var(--brand-2); color: var(--white); justify-content: flex-end; }
 
 .persona-emoji { font-size: 96px; line-height: 1; }
 .small-emoji { font-size: 36px; }
@@ -200,25 +209,83 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* ---------- Summary card ---------- */
 .summary { display: flex; flex-direction: column; gap: 18px; cursor: default; }
 .summary-card {
-  background: var(--white); color: var(--tesco-navy);
+  background: var(--paper); color: var(--ink);
   border-radius: 24px; padding: 20px;
   display: flex; flex-direction: column; gap: 14px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, .25);
-  background: linear-gradient(var(--tesco-red) 0 10px, var(--white) 10px);
+  background: linear-gradient(90deg, var(--house) 0 33%, var(--pop) 33% 66%, var(--brand) 66%) top / 100% 10px no-repeat, var(--paper);
   padding-top: 26px;
 }
-.summary-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.summary-brand { font-family: var(--font-display); font-size: 20px; color: var(--tesco-blue); }
-.summary-period { font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 999px; background: var(--clubcard-yellow); }
+.summary-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 8px; }
+.summary-brand { font-family: var(--font-display); font-size: 20px; color: var(--ink); white-space: nowrap; }
+.summary-period { white-space: nowrap; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 999px; background: var(--pop); }
 .summary-persona { display: flex; align-items: center; gap: 10px; }
-.summary-persona strong { font-family: var(--font-display); font-size: 22px; line-height: 1.1; color: var(--tesco-red); }
+.summary-persona strong { font-family: var(--font-display); font-size: 22px; line-height: 1.1; color: var(--house); }
 .summary-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; opacity: .6; }
 .summary-top ol { margin: 4px 0 0; padding-left: 20px; font-weight: 700; font-size: 14px; line-height: 1.5; }
 .summary-grid { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
 .summary-grid dt { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; opacity: .6; }
-.summary-grid dd { margin: 0; font-family: var(--font-display); font-size: 18px; color: var(--tesco-blue); }
+.summary-grid dd { margin: 0; font-family: var(--font-display); font-size: 18px; color: var(--brand); }
 
 .summary-actions { display: flex; flex-direction: column; gap: 10px; }
 .btn { border: 2px solid var(--fg); background: transparent; border-radius: 999px; padding: 14px 18px; font-weight: 800; }
-.btn-primary { background: var(--clubcard-yellow); border-color: var(--clubcard-yellow); color: var(--tesco-navy); }
+.btn-primary { background: var(--pop); border-color: var(--pop); color: var(--ink); }
 .btn:disabled { opacity: .6; }
+
+/* ---------- New slides ---------- */
+.chips-faded li { text-decoration: line-through; opacity: .75; }
+
+.pricelist { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pricelist li {
+  display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 4px 8px;
+  padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+.price-name { grid-column: 1 / -1; font-weight: 700; font-size: 14px; line-height: 1.25; }
+.price-then { opacity: .7; font-weight: 600; }
+.price-arrow { opacity: .6; }
+.price-now { font-weight: 800; color: var(--house); }
+.pricelist small { font-size: 11px; font-weight: 600; opacity: .7; }
+
+.season-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.season-grid > div { display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 14px; background: color-mix(in srgb, var(--fg) 12%, transparent); }
+.season-grid > div.is-top { background: var(--ink); }
+.season-grid strong { font-family: var(--font-display); font-size: 20px; }
+
+/* ---------- "How does it work?" pop-up ---------- */
+.howto-link {
+  align-self: flex-start; background: none; border: 0; padding: 4px 0;
+  color: var(--pop); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;
+}
+.modal {
+  width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 48px);
+  padding: 0; border: 0; border-radius: 24px;
+  background: var(--paper); color: var(--ink);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+}
+.modal::backdrop { background: rgba(10, 9, 24, .7); backdrop-filter: blur(3px); }
+.modal[open] { animation: rise 300ms cubic-bezier(.2, .8, .2, 1); }
+.modal-body { position: relative; padding: 28px 24px 24px; display: flex; flex-direction: column; gap: 12px; }
+.modal-close { position: absolute; top: 10px; right: 12px; width: 40px; height: 40px; border: 0; background: none; font-size: 30px; line-height: 1; color: var(--ink); }
+.modal-title { margin: 0; font-family: var(--font-display); font-size: 28px; line-height: 1.1; padding-right: 36px; }
+.modal-subtitle { margin: 10px 0 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; opacity: .6; }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: flex; flex-direction: column; gap: 10px; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: start; line-height: 1.4; font-size: 15px; }
+.steps li::before {
+  content: counter(step); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+  background: var(--house); color: var(--white); font-family: var(--font-display); font-size: 16px;
+}
+.steps strong { display: block; }
+.shop-howto { border-radius: 16px; background: color-mix(in srgb, var(--ink) 6%, transparent); padding: 12px 16px; font-size: 15px; }
+.shop-howto summary { cursor: pointer; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.shop-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--chip); }
+.shop-howto ol { margin: 10px 0 0; padding-left: 20px; line-height: 1.5; }
+.shop-howto li { margin-bottom: 6px; }
+.shop-howto a { color: var(--house); font-weight: 700; }
+.coming-soon { margin: 0; font-size: 15px; font-weight: 600; opacity: .75; }
+
+/* ---------- Phone tips ---------- */
+.phone-tip { font-size: 14px; line-height: 1.45; }
+.phone-tip summary { cursor: pointer; font-weight: 700; color: var(--pop); }
+.phone-tip[open] { padding: 12px 14px; border-radius: 14px; background: rgba(255, 255, 255, .07); }
+.phone-tip ol { margin: 6px 0 0; padding-left: 20px; }
+.phone-tip li { margin-bottom: 4px; }

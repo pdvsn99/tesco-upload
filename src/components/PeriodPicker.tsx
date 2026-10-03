@@ -1,16 +1,19 @@
 import type { Period, PeriodId } from '../lib/stats'
 import { delay } from '../lib/ui'
 
-export function PeriodPicker({ periods, onPick, onReset }: {
+export function PeriodPicker({ periods, shopName, remembered, onPick, onReset, onForget }: {
   periods: Period[]
+  shopName: string
+  remembered: boolean
   onPick: (id: PeriodId) => void
   onReset: () => void
+  onForget: () => void
 }) {
   const [all, twelve, ...years] = periods
   return (
     <main className="screen screen-pick">
       <div className="upload-inner">
-        <p className="eyebrow rise">Got it! {all.trips.toLocaleString('en-GB')} shops found</p>
+        <p className="eyebrow rise">Got it! {all.trips.toLocaleString('en-GB')} {shopName} shops found</p>
         <h1 className="title rise" style={delay(80)}>
           Which story do you want to see?
         </h1>
@@ -38,7 +41,15 @@ export function PeriodPicker({ periods, onPick, onReset }: {
           </>
         )}
 
-        <button type="button" className="link-button" onClick={onReset}>Upload a different file</button>
+        <div className="pick-footer">
+          <button type="button" className="link-button" onClick={onReset}>Upload a different file</button>
+          {remembered && (
+            <p className="privacy">
+              💾 Saved on this device only.{' '}
+              <button type="button" className="link-button inline" onClick={onForget}>Forget my data</button>
+            </p>
+          )}
+        </div>
       </div>
     </main>
   )

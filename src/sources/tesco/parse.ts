@@ -1,28 +1,9 @@
-// Turns the raw Tesco data export into a clean, predictable shape.
+// Turns Tesco's data export into the shared Shop/Item shape (see lib/types.ts).
 // The export is messy (mixed casing, missing names, refunds, old till-receipt
 // abbreviations) so everything defensive lives here.
 
-export type PaymentMethod = 'card' | 'cash' | 'giftcard' | 'other'
-
-export interface Item {
-  name: string
-  key: string // normalised name used for grouping
-  quantity: number
-  unitPrice: number
-  lineTotal: number
-  isFuel: boolean
-  litres: number
-  isMystery: boolean // no product name in the export
-}
-
-export interface Shop {
-  date: Date
-  channel: 'store' | 'online'
-  total: number
-  savings: number
-  items: Item[]
-  payments: { method: PaymentMethod; brand: string; amount: number }[]
-}
+import type { Item, PaymentMethod, Shop } from '../../lib/types'
+import { linkOldNames } from './linkNames'
 
 const num = (v: unknown): number => {
   const n = typeof v === 'number' ? v : parseFloat(String(v ?? ''))
@@ -50,7 +31,6 @@ const ABBREVIATIONS: [RegExp, string][] = [
   [/\bltr\b/gi, 'Litre'],
   [/\bspkling\b/gi, 'Sparkling'],
   [/\bvngr\b/gi, 'Vinegar'],
-  [/\bb\/berry\b/gi, 'Blueberry'],
   [/\bb\/crnt\b/gi, 'Blackcurrant'],
   [/^t\.? (?=[a-z])/i, 'Tesco '],
   [/\s*\(c\)$/i, ''],
@@ -67,7 +47,6 @@ export function tidyName(raw: string): string {
     s = s.toLowerCase().replace(/(^|[\s(&/-])([a-z])/g, (_, p, c) => p + c.toUpperCase())
   }
   for (const [re, to] of ABBREVIATIONS) s = s.replace(re, to)
-  if (/^medium sliced white$/i.test(s)) return 'Medium Sliced White Bread'
   return s.trim()
 }
 
@@ -79,8 +58,11 @@ function parseItem(raw: Record<string, unknown>): Item {
   // Fuel shows up as a nameless line with a fractional "volume" (litres).
   const isFuel = !rawName && volume > 2 && !Number.isInteger(volume)
   const name = rawName ? tidyName(rawName) : isFuel ? 'Fuel' : 'Mystery item'
+  const letters = rawName.replace(/[^a-zA-Z]/g, '')
   return {
     name,
+    rawName,
+    fromTill: !!letters && letters === letters.toUpperCase(),
     key: name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(),
     quantity,
     unitPrice,
@@ -88,6 +70,7 @@ function parseItem(raw: Record<string, unknown>): Item {
     isFuel,
     litres: isFuel ? volume : 0,
     isMystery: !rawName && !isFuel,
+    weighed: num(raw.weight) > 0,
   }
 }
 
@@ -148,5 +131,7 @@ export function parseExport(json: unknown): Shop[] {
     ...orders.map((o) => parseShop(o as Record<string, unknown>, 'online')),
   ].filter((s): s is Shop => s !== null)
   if (!shops.length) throw new Error("We found the file, but couldn't read any dates in it.")
-  return shops.sort((a, b) => a.date.getTime() - b.date.getTime())
+  shops.sort((a, b) => a.date.getTime() - b.date.getTime())
+  linkOldNames(shops)
+  return shops
 }
