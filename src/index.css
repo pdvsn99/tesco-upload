@@ -71,12 +71,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .dropzone:hover, .dropzone.is-dragging { background: rgba(255, 255, 255, .18); border-color: var(--pop); transform: scale(1.02); }
 .dropzone strong { font-size: 18px; }
 .dropzone span { font-size: 14px; opacity: .85; }
-.dropzone-icon { font-size: 40px; opacity: 1 !important; }
+.dropzone .dropzone-icon { font-size: 40px; line-height: 1; opacity: 1; }
 
 .error { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--paper); color: var(--house); font-weight: 600; }
-.howto { background: rgba(0, 0, 0, .15); border-radius: 14px; padding: 12px 16px; font-size: 15px; }
-.howto summary { cursor: pointer; font-weight: 700; }
-.howto ol { margin: 10px 0 0; padding-left: 20px; line-height: 1.6; }
 .privacy { margin: 0; font-size: 14px; opacity: .9; }
 .disclaimer { margin-top: 28px; font-size: 12px; opacity: .6; text-align: center; }
 
@@ -100,8 +97,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .pick-footer { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
 .remember { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.4; cursor: pointer; }
 .remember input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--pop); flex-shrink: 0; }
-.howto a { color: var(--pop); font-weight: 700; }
-.howto li { margin-bottom: 6px; }
 .howto-note { margin: 10px 0 0; font-size: 14px; opacity: .9; }
 
 /* ---------- Story ---------- */
@@ -256,8 +251,34 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .season-grid > div.is-top { background: var(--ink); }
 .season-grid strong { font-family: var(--font-display); font-size: 20px; }
 
-/* ---------- Supported supermarkets ---------- */
-.shops { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.shop-chip { padding: 5px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; background: rgba(255, 255, 255, .08); color: rgba(255, 255, 255, .45); }
-.shop-chip.is-ready { background: var(--chip, var(--house)); color: var(--white); box-shadow: 0 0 0 2px var(--white) inset; }
-.shops-note { font-size: 12px; opacity: .6; }
+/* ---------- "How does it work?" pop-up ---------- */
+.howto-link {
+  align-self: flex-start; background: none; border: 0; padding: 4px 0;
+  color: var(--pop); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;
+}
+.modal {
+  width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 48px);
+  padding: 0; border: 0; border-radius: 24px;
+  background: var(--paper); color: var(--ink);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+}
+.modal::backdrop { background: rgba(10, 9, 24, .7); backdrop-filter: blur(3px); }
+.modal[open] { animation: rise 300ms cubic-bezier(.2, .8, .2, 1); }
+.modal-body { position: relative; padding: 28px 24px 24px; display: flex; flex-direction: column; gap: 12px; }
+.modal-close { position: absolute; top: 10px; right: 12px; width: 40px; height: 40px; border: 0; background: none; font-size: 30px; line-height: 1; color: var(--ink); }
+.modal-title { margin: 0; font-family: var(--font-display); font-size: 28px; line-height: 1.1; padding-right: 36px; }
+.modal-subtitle { margin: 10px 0 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; opacity: .6; }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: flex; flex-direction: column; gap: 10px; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: start; line-height: 1.4; font-size: 15px; }
+.steps li::before {
+  content: counter(step); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+  background: var(--house); color: var(--white); font-family: var(--font-display); font-size: 16px;
+}
+.steps strong { display: block; }
+.shop-howto { border-radius: 16px; background: color-mix(in srgb, var(--ink) 6%, transparent); padding: 12px 16px; font-size: 15px; }
+.shop-howto summary { cursor: pointer; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.shop-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--chip); }
+.shop-howto ol { margin: 10px 0 0; padding-left: 20px; line-height: 1.5; }
+.shop-howto li { margin-bottom: 6px; }
+.shop-howto a { color: var(--house); font-weight: 700; }
+.coming-soon { margin: 0; font-size: 15px; font-weight: 600; opacity: .75; }

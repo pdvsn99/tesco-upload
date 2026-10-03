@@ -1,8 +1,8 @@
-import { useRef, useState, type CSSProperties } from 'react'
+import { useRef, useState } from 'react'
 import { delay } from '../lib/ui'
 import { readUpload, type LoadedData } from '../lib/readFile'
 import { forgetUpload, saveUpload } from '../lib/storage'
-import { comingSoonSources, readySources } from '../sources'
+import { HowItWorks } from './HowItWorks'
 
 export function Upload({ onLoaded }: { onLoaded: (data: LoadedData, remembered: boolean) => void }) {
   const input = useRef<HTMLInputElement>(null)
@@ -10,6 +10,7 @@ export function Upload({ onLoaded }: { onLoaded: (data: LoadedData, remembered: 
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [remember, setRemember] = useState(true)
+  const [showHow, setShowHow] = useState(false)
 
   async function read(file: File | undefined) {
     if (!file) return
@@ -37,16 +38,6 @@ export function Upload({ onLoaded }: { onLoaded: (data: LoadedData, remembered: 
         <p className="lede rise" style={delay(160)}>
           Upload your supermarket shopping history and we'll turn it into a story about how you shop.
         </p>
-
-        <div className="shops rise" style={delay(200)}>
-          {readySources.map((s) => (
-            <span key={s.id} className="shop-chip is-ready" style={{ '--chip': s.colors.brand } as CSSProperties}>✓ {s.name}</span>
-          ))}
-          {comingSoonSources.map((s) => (
-            <span key={s.id} className="shop-chip">{s.name}</span>
-          ))}
-          <span className="shops-note">Greyed out = coming soon</span>
-        </div>
 
         <button
           type="button"
@@ -82,23 +73,17 @@ export function Upload({ onLoaded }: { onLoaded: (data: LoadedData, remembered: 
 
         <label className="remember rise" style={delay(280)}>
           <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-          Remember my data on this device, so I don't have to upload it again
+          Remember my data on this device
         </label>
 
         {error && <p className="error" role="alert">{error}</p>}
 
-        {readySources.map((s) => s.howTo && (
-          <details key={s.id} className="howto rise" style={delay(320)}>
-            <summary>How do I get my {s.name} data?</summary>
-            <p className="howto-note">It's free and takes a few minutes.</p>
-            <ol>{s.howTo.steps.map((step, i) => <li key={i}>{step}</li>)}</ol>
-            {s.howTo.notes?.map((note, i) => <p key={i} className="howto-note">{note}</p>)}
-          </details>
-        ))}
+        <button type="button" className="howto-link rise" style={delay(320)} onClick={() => setShowHow(true)}>
+          How does it work?
+        </button>
+        <HowItWorks open={showHow} onClose={() => setShowHow(false)} />
 
-        <p className="privacy rise" style={delay(400)}>
-          🔒 Your data never leaves your device. Everything is worked out in your browser.
-        </p>
+        <p className="privacy rise" style={delay(400)}>🔒 Your data never leaves your device.</p>
       </div>
       <footer className="disclaimer">A fan-made project. Not affiliated with or endorsed by any supermarket.</footer>
     </main>
