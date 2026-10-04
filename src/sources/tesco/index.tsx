@@ -8,6 +8,8 @@ export const tesco: Source = {
   name: 'Tesco',
   savingsLabel: 'Clubcard prices and offers',
   colors: { brand: '#00539f', brand2: '#ee1c2e' },
+  // "Tesco ..." plus the brands Tesco owns but doesn't put its name on.
+  ownLabel: /^(tesco|stockwell|hearty food co|ms molly|creamfields|growers? harvest|eastmans?|h\.? ?w\.? nevill|boswell farms|woodside farms|willow farms|redmere farms|nightingale farms|rosedene farms|suntrail farms|bay fishmongers|wicked kitchen|plant chef|exclusively at tesco|fresh ideas|go cook|fox & ivy)\b/i,
   howTo: {
     steps: [
       <>

@@ -8,3 +8,14 @@ export function detectPlatform(): Platform {
   if (/Android/.test(ua)) return 'android'
   return 'other'
 }
+
+// Can this browser hand a picture to the phone's share sheet? Desktop browsers
+// that say yes (like Safari on a Mac) still get the simpler "Download" button.
+export function canShareFiles(): boolean {
+  if (detectPlatform() === 'other') return false
+  try {
+    return !!navigator.canShare?.({ files: [new File([''], 'test.png', { type: 'image/png' })] })
+  } catch {
+    return false
+  }
+}

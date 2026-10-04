@@ -15,8 +15,8 @@ const median = (xs: number[]) => {
 }
 
 // Real products only: no fuel, nameless lines, refunds or carrier bags.
-const isProduct = (i: Item) => i.quantity > 0 && !i.isFuel && !i.isMystery && !BAG.test(i.name) && !isVague(i.name)
-const units = (i: Item) => (i.quantity >= 1 ? Math.round(i.quantity) : 1)
+export const isProduct = (i: Item) => i.quantity > 0 && !i.isFuel && !i.isMystery && !BAG.test(i.name) && !isVague(i.name)
+export const units = (i: Item) => (i.quantity >= 1 ? Math.round(i.quantity) : 1)
 
 export interface ProductTally {
   name: string
