@@ -1,5 +1,6 @@
 import type { Item, Shop } from './types'
 import { carrierBags, christmas, habits, priceCheck, seasons, thenVsNow } from './extras'
+import { aisles, baskets, brands as ownLabelVsBrands, treatsVsGreens } from './insights'
 import { pickPersona, shopperType, timeBadge } from './persona'
 
 export type PeriodId = 'all' | '12m' | `y${number}`
@@ -90,6 +91,10 @@ export interface Stats {
   seasons: ReturnType<typeof seasons>
   christmas: ReturnType<typeof christmas>
   bags: ReturnType<typeof carrierBags>
+  aisles: ReturnType<typeof aisles>
+  treatsVsGreens: ReturnType<typeof treatsVsGreens>
+  brands: ReturnType<typeof ownLabelVsBrands>
+  baskets: ReturnType<typeof baskets>
 }
 
 export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -103,7 +108,13 @@ function argMax(values: number[]): number {
   return values.reduce((best, v, i) => (v > values[best] ? i : best), 0)
 }
 
-export function computeStats(shops: Shop[], period: Period, all: Shop[], now = new Date()): Stats | null {
+export function computeStats(
+  shops: Shop[],
+  period: Period,
+  all: Shop[],
+  ownLabel?: RegExp, // the supermarket's own-label product names (see sources/types.ts)
+  now = new Date(),
+): Stats | null {
   if (!shops.length) return null
   const trips = shops.length
   const spend = shops.reduce((a, s) => a + s.total, 0)
@@ -235,5 +246,9 @@ export function computeStats(shops: Shop[], period: Period, all: Shop[], now = n
     seasons: seasons(shops),
     christmas: christmas(shops),
     bags: carrierBags(shops),
+    aisles: aisles(shops),
+    treatsVsGreens: treatsVsGreens(shops),
+    brands: ownLabelVsBrands(shops, ownLabel),
+    baskets: baskets(shops),
   }
 }

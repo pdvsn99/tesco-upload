@@ -11,8 +11,11 @@ Upload your supermarket data download (for Tesco, the `.zip` Tesco sends, or the
 - **Habits & timing**: favourite day and hour, busiest month, longest gap between shops, late-night shops, cash vs card, fuel
 - **Then vs now**: compared with the previous year or 12 months, new favourites, and regulars you've stopped buying
 - **Price check**: how much your regular items have gone up since you first bought them
+- **Where your money goes**: spending by aisle, treats vs fruit & veg, own label vs big brands (and your favourite brand), big shops vs quick top-ups
 - **Fun extras**: your first ever receipt, seasons, Christmas shopping, same-day return trips, longest streak, carrier bags
 - **Personality**: one of 14 personalities (e.g. "The Ice Cream Devotee", "The Meal Deal Legend"), a shopper type and a time-of-day badge, plus a summary card you can save or share as an image
+
+On a computer the story shows as a phone-sized card with arrows either side, keyboard shortcuts (← → to move, Esc to close) and, on wide screens, a list of every screen to jump between. The upload page shows the how-to steps beside the upload box.
 
 Everything runs in the browser. The file is never uploaded to a server. If you tick "remember", it's stored only in that browser (IndexedDB), and there's a "Forget my data" button.
 

@@ -12,6 +12,8 @@ export interface Source {
   name: string // "Tesco"
   savingsLabel: string // finishes "… saved you £X"
   colors: { brand: string; brand2: string } // accents mixed into the house style
+  /** Matches product names from the supermarket's own label, for the "own label vs brands" slide. */
+  ownLabel?: RegExp
   /** How to get the data, shown on the upload screen. */
   howTo?: { steps: ReactNode[]; notes?: ReactNode[] }
   /**
