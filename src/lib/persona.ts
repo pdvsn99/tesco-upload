@@ -66,7 +66,7 @@ export function pickPersona(items: Item[]): Persona & { share: number } {
   const spend: Record<string, number> = {}
   let total = 0
   for (const i of items) {
-    if (i.quantity <= 0) continue
+    if (i.quantity <= 0 || i.isClothing) continue
     total += i.lineTotal
     const c = categorise(i)
     if (c) spend[c] = (spend[c] ?? 0) + i.lineTotal

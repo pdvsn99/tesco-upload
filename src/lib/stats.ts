@@ -78,6 +78,8 @@ export interface Stats {
   topCardBrand: string | null
   fuelLitres: number
   fuelVisits: number
+  clothes: { pieces: number; spend: number; returned: number; trips: number } | null
+  selfScan: { trips: number; share: number; spend: number } | null
   refunds: number
   byYear: { year: number; spend: number; trips: number }[]
   persona: ReturnType<typeof pickPersona>
@@ -113,10 +115,10 @@ export function computeStats(shops: Shop[], period: Period, all: Shop[], now = n
   const first = shops[0].date
   const last = shops[trips - 1].date
 
-  // Products, ignoring fuel and nameless lines
+  // Products, ignoring fuel, clothes and nameless lines
   const products = new Map<string, Ranked>()
   for (const i of bought) {
-    if (i.isFuel || i.isMystery) continue
+    if (i.isFuel || i.isMystery || i.isClothing) continue
     const p = products.get(i.key) ?? { name: i.name, count: 0, spend: 0 }
     p.count += i.quantity >= 1 ? Math.round(i.quantity) : 1
     p.spend += i.lineTotal
@@ -126,12 +128,14 @@ export function computeStats(shops: Shop[], period: Period, all: Shop[], now = n
   const topProducts = [...ranked].sort((a, b) => b.count - a.count || b.spend - a.spend).slice(0, 5)
   const topBySpend = [...ranked].sort((a, b) => b.spend - a.spend)[0] ?? null
 
-  // Skip anything that was later returned, so a refunded hoover doesn't win.
+  // Skip anything that was later returned, so a refunded hoover doesn't win,
+  // loose veg, whose price is per kg rather than per item, and clothes, which
+  // get their own slide.
   const refunded = new Set(items.filter((i) => i.quantity < 0).map((i) => i.key))
   let priciestItem: Stats['priciestItem'] = null
   for (const s of shops)
     for (const i of s.items)
-      if (i.quantity > 0 && !i.isFuel && !i.isMystery && !refunded.has(i.key) && (!priciestItem || i.unitPrice > priciestItem.item.unitPrice))
+      if (i.quantity > 0 && !i.isFuel && !i.isMystery && !i.weighed && !i.isClothing && !refunded.has(i.key) && (!priciestItem || i.unitPrice > priciestItem.item.unitPrice))
         priciestItem = { item: i, date: s.date }
 
   const weekdayTrips = Array(7).fill(0)
@@ -171,6 +175,9 @@ export function computeStats(shops: Shop[], period: Period, all: Shop[], now = n
   const topCardBrand = [...brands.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
 
   const fuel = bought.filter((i) => i.isFuel)
+  const clothes = bought.filter((i) => i.isClothing)
+  const clothesBack = items.filter((i) => i.isClothing && i.quantity < 0)
+  const selfScanned = shops.filter((s) => s.selfScan)
   const years = new Map<number, { year: number; spend: number; trips: number }>()
   for (const s of shops) {
     const y = years.get(s.date.getFullYear()) ?? { year: s.date.getFullYear(), spend: 0, trips: 0 }
@@ -223,6 +230,18 @@ export function computeStats(shops: Shop[], period: Period, all: Shop[], now = n
     topCardBrand,
     fuelLitres: fuel.reduce((a, i) => a + i.litres, 0),
     fuelVisits: shops.filter((s) => s.items.some((i) => i.isFuel)).length,
+    clothes: clothes.length
+      ? {
+          pieces: clothes.reduce((a, i) => a + Math.round(i.quantity), 0),
+          // Returns come back as negative lines, so they take the money off again.
+          spend: clothes.reduce((a, i) => a + i.lineTotal, 0) + clothesBack.reduce((a, i) => a + i.lineTotal, 0),
+          returned: clothesBack.reduce((a, i) => a - Math.round(i.quantity), 0),
+          trips: shops.filter((s) => s.items.some((i) => i.isClothing && i.quantity > 0)).length,
+        }
+      : null,
+    selfScan: selfScanned.length
+      ? { trips: selfScanned.length, share: selfScanned.length / trips, spend: selfScanned.reduce((a, s) => a + s.total, 0) }
+      : null,
     refunds: items.filter((i) => i.quantity < 0).length,
     byYear: [...years.values()].sort((a, b) => a.year - b.year),
     persona: pickPersona(bought),

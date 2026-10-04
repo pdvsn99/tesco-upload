@@ -378,6 +378,47 @@ export function buildSlides(s: Stats, source: Source, actions: { onRestart: () =
     ))
   }
 
+  if (s.selfScan) {
+    const ss = s.selfScan
+    add('selfscan', 'house', (
+      <>
+        <p className="lede rise">Who needs a checkout? 📱</p>
+        <h1 className="huge rise" style={fit(count(ss.trips), 150)}>
+          <CountUp value={ss.trips} format={count} />
+        </h1>
+        <p className="lede rise" style={delay(300)}>
+          {ss.trips === 1 ? 'shop' : 'shops'} where you scanned it all yourself with Scan as you Shop.
+        </p>
+        <p className="lede rise" style={delay(800)}>
+          That's <strong>{percent(ss.share)}</strong> of your trips, and {moneyRound(ss.spend)} beeped through by your own fair hand.
+        </p>
+        <p className="small rise" style={delay(1100)}>{ss.share >= 0.5 ? 'Basically staff at this point.' : 'Random check, anyone?'}</p>
+      </>
+    ))
+  }
+
+  if (s.clothes) {
+    const c = s.clothes
+    add('clothes', 'pop', (
+      <>
+        <p className="lede rise">Not just the food shop 👗</p>
+        <h1 className="huge rise" style={fit(count(c.pieces), 150)}>
+          <CountUp value={c.pieces} format={count} />
+        </h1>
+        <p className="lede rise" style={delay(300)}>
+          bits of F&amp;F clothing went in the trolley, across {plural(c.trips, 'shop')}.
+        </p>
+        <p className="lede rise" style={delay(800)}>
+          That came to <strong>{moneyRound(Math.max(0, c.spend))}</strong>
+          {c.returned > 0 ? <>, once you take off the {plural(c.returned, 'piece')} you took back.</> : '.'}
+        </p>
+        <p className="small rise" style={delay(1100)}>
+          {c.returned > 0 ? 'The changing room is optional. The returns desk is not.' : 'Milk, bread, new jeans. Why not?'}
+        </p>
+      </>
+    ))
+  }
+
   if (s.bags) {
     add('bags', 'paper', (
       <>

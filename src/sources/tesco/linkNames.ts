@@ -67,7 +67,7 @@ export function linkOldNames(shops: Shop[]): [string, string][] {
   const newNames = new Map<string, Product>()
   for (const s of shops)
     for (const i of s.items) {
-      if (i.quantity <= 0 || i.isFuel || i.isMystery || i.weighed) continue
+      if (i.quantity <= 0 || i.isFuel || i.isMystery || i.weighed || i.isClothing) continue
       const target = i.fromTill ? oldNames : newNames
       const id = i.fromTill ? i.rawName : i.key
       const p = target.get(id) ?? { name: i.name, key: i.key, parts: split(i.rawName), first: s.date.getTime(), last: 0, prices: [], count: 0 }

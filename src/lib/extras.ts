@@ -14,8 +14,8 @@ const median = (xs: number[]) => {
   return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2
 }
 
-// Real products only: no fuel, nameless lines, refunds or carrier bags.
-const isProduct = (i: Item) => i.quantity > 0 && !i.isFuel && !i.isMystery && !BAG.test(i.name) && !isVague(i.name)
+// Real products only: no fuel, nameless lines, refunds, clothes or carrier bags.
+const isProduct = (i: Item) => i.quantity > 0 && !i.isFuel && !i.isMystery && !i.isClothing && !BAG.test(i.name) && !isVague(i.name)
 const units = (i: Item) => (i.quantity >= 1 ? Math.round(i.quantity) : 1)
 
 export interface ProductTally {
