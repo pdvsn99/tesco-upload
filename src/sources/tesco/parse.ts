@@ -50,14 +50,22 @@ export function tidyName(raw: string): string {
   return s.trim()
 }
 
+const FUEL = /^(unleaded|diesel|super unleaded|v-power|momentum 99|petrol)\b/i
+
 function parseItem(raw: Record<string, unknown>): Item {
   const quantity = num(raw.quantity ?? raw.qty ?? 1)
   const unitPrice = num(raw.price ?? raw.unitPrice)
   const volume = num(raw.volume)
+  const weight = num(raw.weight)
   const rawName = typeof raw.name === 'string' ? raw.name.trim() : ''
-  // Fuel shows up as a nameless line with a fractional "volume" (litres).
-  const isFuel = !rawName && volume > 2 && !Number.isInteger(volume)
+  // Fuel shows up as a nameless line with a fractional "volume" (litres), or
+  // as "UNLEADED" / "DIESEL" where "price" is per litre and "volume" is litres.
+  const namedFuel = FUEL.test(rawName) && volume > 0 && !Number.isInteger(volume)
+  const isFuel = namedFuel || (!rawName && volume > 2 && !Number.isInteger(volume))
   const name = rawName ? tidyName(rawName) : isFuel ? 'Fuel' : 'Mystery item'
+  // Loose fruit and veg: "price" is per kg and "weight" is how many kg you took.
+  const weighed = weight > 0
+  const amount = weighed ? weight * quantity : namedFuel ? volume : quantity
   const letters = rawName.replace(/[^a-zA-Z]/g, '')
   return {
     name,
@@ -66,11 +74,11 @@ function parseItem(raw: Record<string, unknown>): Item {
     key: name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(),
     quantity,
     unitPrice,
-    lineTotal: Math.round(unitPrice * quantity * 100) / 100,
+    lineTotal: Math.round(unitPrice * amount * 100) / 100,
     isFuel,
     litres: isFuel ? volume : 0,
     isMystery: !rawName && !isFuel,
-    weighed: num(raw.weight) > 0,
+    weighed,
   }
 }
 
@@ -97,7 +105,9 @@ function parsePayments(raw: unknown): Shop['payments'] {
   })
 }
 
-function parseShop(raw: Record<string, unknown>, channel: Shop['channel']): Shop | null {
+function parseShop(raw: Record<string, unknown>, fallback: Shop['channel']): Shop | null {
+  // Online orders ("GHS", grocery home shopping) also turn up in "purchases".
+  const channel = /^ghs$|online|delivery|collect/i.test(String(raw.type ?? '')) ? 'online' : fallback
   const date = parseTimestamp(
     raw.timestamp ?? raw.orderDate ?? raw.date ?? raw.deliveryDate ?? raw.placedDate,
   )

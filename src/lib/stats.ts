@@ -126,12 +126,13 @@ export function computeStats(shops: Shop[], period: Period, all: Shop[], now = n
   const topProducts = [...ranked].sort((a, b) => b.count - a.count || b.spend - a.spend).slice(0, 5)
   const topBySpend = [...ranked].sort((a, b) => b.spend - a.spend)[0] ?? null
 
-  // Skip anything that was later returned, so a refunded hoover doesn't win.
+  // Skip anything that was later returned, so a refunded hoover doesn't win,
+  // and loose veg, whose price is per kg rather than per item.
   const refunded = new Set(items.filter((i) => i.quantity < 0).map((i) => i.key))
   let priciestItem: Stats['priciestItem'] = null
   for (const s of shops)
     for (const i of s.items)
-      if (i.quantity > 0 && !i.isFuel && !i.isMystery && !refunded.has(i.key) && (!priciestItem || i.unitPrice > priciestItem.item.unitPrice))
+      if (i.quantity > 0 && !i.isFuel && !i.isMystery && !i.weighed && !refunded.has(i.key) && (!priciestItem || i.unitPrice > priciestItem.item.unitPrice))
         priciestItem = { item: i, date: s.date }
 
   const weekdayTrips = Array(7).fill(0)
