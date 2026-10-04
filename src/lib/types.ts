@@ -16,6 +16,7 @@ export interface Item {
   litres: number
   isMystery: boolean // no product name in the export
   weighed: boolean // sold by weight, so the price depends on how much you took
+  isClothing: boolean // clothes and accessories (Tesco's F&F range), kept out of the food stats
 }
 
 export interface Shop {
@@ -25,4 +26,5 @@ export interface Shop {
   savings: number
   items: Item[]
   payments: { method: PaymentMethod; brand: string; amount: number }[]
+  selfScan: boolean // scanned your own shopping (Tesco's Scan as you Shop)
 }

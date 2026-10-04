@@ -11,7 +11,7 @@ Upload your supermarket data download (for Tesco, the `.zip` Tesco sends, or the
 - **Habits & timing**: favourite day and hour, busiest month, longest gap between shops, late-night shops, cash vs card, fuel
 - **Then vs now**: compared with the previous year or 12 months, new favourites, and regulars you've stopped buying
 - **Price check**: how much your regular items have gone up since you first bought them
-- **Fun extras**: your first ever receipt, seasons, Christmas shopping, same-day return trips, longest streak, carrier bags
+- **Fun extras**: your first ever receipt, seasons, Christmas shopping, same-day return trips, longest streak, carrier bags, Scan as you Shop, F&F clothing (kept out of the food stats)
 - **Personality**: one of 14 personalities (e.g. "The Ice Cream Devotee", "The Meal Deal Legend"), a shopper type and a time-of-day badge, plus a summary card you can save or share as an image
 
 Everything runs in the browser. The file is never uploaded to a server. If you tick "remember", it's stored only in that browser (IndexedDB), and there's a "Forget my data" button.

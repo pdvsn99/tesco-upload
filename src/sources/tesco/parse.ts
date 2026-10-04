@@ -50,6 +50,11 @@ export function tidyName(raw: string): string {
   return s.trim()
 }
 
+// F&F clothing: new names start "F&F" ("F&F Wide Leg Trousers in Black"); old
+// till names start with a season code ("SS23 FF  VEST CHLOE RACER VES ORNGE  M")
+// or "CNTY" for year-round lines. F&F Home (mugs, cushions) isn't clothing.
+const CLOTHING = /^(ss|aw)\d\d\s|^cnty\s+ff\s|^(f&f|ff)\s(?!home\b)/i
+
 const FUEL = /^(unleaded|diesel|super unleaded|v-power|momentum 99|petrol)\b/i
 
 function parseItem(raw: Record<string, unknown>): Item {
@@ -79,6 +84,7 @@ function parseItem(raw: Record<string, unknown>): Item {
     litres: isFuel ? volume : 0,
     isMystery: !rawName && !isFuel,
     weighed,
+    isClothing: !isFuel && CLOTHING.test(rawName.replace(/^(ss|aw)\d\d\s+(?=f&f\s)/i, '')),
   }
 }
 
@@ -125,6 +131,7 @@ function parseShop(raw: Record<string, unknown>, fallback: Shop['channel']): Sho
     savings: num(raw.overallBasketSavings ?? raw.savings ?? raw.totalSavings),
     items,
     payments: parsePayments(raw.payment ?? raw.payments),
+    selfScan: String(raw.says ?? '').toLowerCase() === 'yes',
   }
 }
 
