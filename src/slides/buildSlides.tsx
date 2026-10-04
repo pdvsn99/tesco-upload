@@ -17,6 +17,9 @@ export interface Slide {
 }
 
 // The first UK lockdown ran from 23 March to early July 2020.
+// Label for one part of a split bar, left off when the part is too thin to fit it.
+const label = (text: string, share: number) => (share >= 0.15 ? text : null)
+
 const duringLockdown = (from: Date, to: Date) => from < new Date(2020, 6, 4) && to > new Date(2020, 2, 23)
 
 export function buildSlides(s: Stats, source: Source, actions: { onRestart: () => void; onNewFile: () => void }): Slide[] {
@@ -187,9 +190,9 @@ export function buildSlides(s: Stats, source: Source, actions: { onRestart: () =
         <h1 className="huge rise" style={fit(percent(main.n / b.total), 150)}>{percent(main.n / b.total)}</h1>
         <p className="lede rise" style={delay(300)}>of your shops were {main.what}.</p>
         <div className="split split-3 rise" style={delay(600)}>
-          {b.topUp > 0 && <div style={{ flexGrow: b.topUp }}>Top-ups</div>}
-          {b.middle > 0 && <div style={{ flexGrow: b.middle }}>Middle</div>}
-          {b.big > 0 && <div style={{ flexGrow: b.big }}>Big shops</div>}
+          <div className="split-a" style={{ flexGrow: b.topUp }}>{label('Top-ups', b.topUp / b.total)}</div>
+          <div className="split-b" style={{ flexGrow: b.middle }}>{label('Middle', b.middle / b.total)}</div>
+          <div className="split-c" style={{ flexGrow: b.big }}>{label('Big shops', b.big / b.total)}</div>
         </div>
         <p className="small rise" style={delay(900)}>
           {main.quip} On average you leave with <strong>{plural(Math.round(b.avgItems), 'item')}</strong>.
@@ -309,8 +312,8 @@ export function buildSlides(s: Stats, source: Source, actions: { onRestart: () =
           </div>
         </div>
         <div className="split split-vs rise" style={delay(500)}>
-          <div style={{ flexGrow: Math.max(t.greens, (t.greens + t.treats) * 0.02) }}>Greens</div>
-          <div style={{ flexGrow: Math.max(t.treats, (t.greens + t.treats) * 0.02) }}>Treats</div>
+          <div style={{ flexGrow: t.greens }}>{label('Greens', t.greens / (t.greens + t.treats))}</div>
+          <div style={{ flexGrow: t.treats }}>{label('Treats', t.treats / (t.greens + t.treats))}</div>
         </div>
         <p className="lede rise" style={delay(900)}>{verdict}</p>
       </>
@@ -325,8 +328,8 @@ export function buildSlides(s: Stats, source: Source, actions: { onRestart: () =
         <h1 className="huge rise" style={fit(percent(b.ownShare), 150)}>{percent(b.ownShare)}</h1>
         <p className="lede rise" style={delay(300)}>of what you spent on packaged food and drink went on {shop}'s own label.</p>
         <div className="split split-vs rise" style={delay(600)}>
-          <div style={{ flexGrow: Math.max(b.ownShare, 0.02) }}>{shop}</div>
-          <div style={{ flexGrow: Math.max(1 - b.ownShare, 0.02) }}>Brands</div>
+          <div style={{ flexGrow: b.ownShare }}>{label(shop, b.ownShare)}</div>
+          <div style={{ flexGrow: 1 - b.ownShare }}>{label('Brands', 1 - b.ownShare)}</div>
         </div>
         <p className="lede rise" style={delay(900)}>
           {b.ownShare >= 0.6 ? 'Brand loyalty? Never heard of it.' : b.ownShare <= 0.3 ? 'Only the real thing will do.' : 'A healthy mix of both.'}
@@ -483,10 +486,16 @@ export function buildSlides(s: Stats, source: Source, actions: { onRestart: () =
         <p className="lede rise">Cash or card?</p>
         <h1 className="huge rise" style={fit(percent(cardWins ? s.cardShare : s.cashShare), 150)}>{percent(cardWins ? s.cardShare : s.cashShare)}</h1>
         <p className="lede rise" style={delay(300)}>of your spending was by {cardWins ? 'card' : 'cash'}.</p>
-        <div className="split rise" style={delay(600)}>
-          <div className="split-card" style={{ flexGrow: Math.max(s.cardShare, 0.02) }}>Card</div>
-          <div className="split-cash" style={{ flexGrow: Math.max(s.cashShare, 0.02) }}>Cash</div>
-        </div>
+        {percent(cardWins ? s.cardShare : s.cashShare) === '100%' ? (
+          <p className="lede rise" style={delay(600)}>
+            {cardWins ? 'Every single shop, paid by card. Cash? Never heard of it.' : 'Every single shop, paid in cash. Proper old school.'}
+          </p>
+        ) : (
+          <div className="split rise" style={delay(600)}>
+            <div className="split-card" style={{ flexGrow: s.cardShare }}>{label('Card', s.cardShare)}</div>
+            <div className="split-cash" style={{ flexGrow: s.cashShare }}>{label('Cash', s.cashShare)}</div>
+          </div>
+        )}
         {s.topCardBrand && (
           <p className="small rise" style={delay(900)}>Most used: {s.topCardBrand}</p>
         )}
