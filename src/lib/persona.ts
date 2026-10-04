@@ -9,7 +9,11 @@ const CATEGORIES: { id: string; words: string[] }[] = [
   { id: 'booze', words: ['beer', 'lager', 'wine', 'gin', 'vodka', 'whisky', 'whiskey', 'cider', 'prosecco', 'peroni', 'ale', 'rum', 'stella', 'corona', 'budweiser', 'cava', 'champagne', 'merlot', 'sauvignon', 'malbec', 'rioja'] },
   { id: 'caffeine', words: ['coffee', 'nescafe', 'latte', 'cappuccino', 'espresso', 'americano', 'caffe', 'caffionata', 'monster', 'energy', 'red bull', 'relentless', 'lucozade', 'rockstar', 'tea bags', 'teabags', 'pg tips', 'tetley', 'yorkshire tea'] },
   { id: 'fizzy', words: ['cola', 'pepsi', 'coke', 'lemonade', 'fanta', 'sprite', 'irn bru', 'squash', 'sparkling', 'spkling', 'tango', '7up', 'dr pepper', 'oasis', 'juice'] },
-  { id: 'sweet', words: ['choc', 'shortbread', 'gum', 'lolly', 'chewits', 'squashies', 'lindt', 'laces', 'pencils', 'chocolate', 'cadbury', 'sweets', 'haribo', 'biscuit', 'cookie', 'cake', 'rocky road', 'twix', 'bounty', 'maoam', 'rowntree', 'kitkat', 'galaxy', 'mars', 'snickers', 'maltesers', 'buttons', 'doughnut', 'donut', 'brownie', 'creams', 'muffin', 'gums', 'jelly', 'nibbles', 'popcorn', 'crisps', 'pringles', 'walkers', 'doritos', 'skittles', 'candy', 'fudge', 'toffee', 'oreo'] },
+  { id: 'sweet', words: ['choc', 'shortbread', 'gum', 'lolly', 'chewits', 'squashies', 'lindt', 'laces', 'pencils', 'chocolate', 'cadbury', 'sweets', 'haribo', 'biscuit', 'cookie', 'cake', 'rocky road', 'twix', 'bounty', 'maoam', 'rowntree', 'kitkat', 'galaxy', 'mars', 'snickers', 'maltesers', 'buttons', 'doughnut', 'donut', 'brownie', 'creams', 'muffin', 'gums', 'jelly', 'nibbles', 'popcorn', 'crisps', 'pringles', 'walkers', 'doritos', 'skittles', 'candy', 'fudge', 'toffee', 'oreo',
+    // Sweets named after fruit or other foods ("Shrimps & Bananas", "Cola Bottles"), so they don't count as fresh
+    'foam', 'shrimps & bananas', 'shrimps and bananas', 'jelly babies', 'jelly beans', 'fruit pastilles', 'fruit gums',
+    'midget gems', 'cola bottles', 'milk bottles', 'sherbet', 'marshmallow', 'liquorice', 'allsorts', 'flumps',
+    'drumstick', 'starburst', 'pick & mix', 'pick n mix', 'chews', 'love hearts', 'refreshers', 'mints'] },
   { id: 'freezer', words: ['frozen', 'fish fingers', 'oven chips', 'pizza', 'nuggets', 'waffles', 'hash brown', 'hash browns', 'birds eye', 'mccain', 'dippers', 'potato smiles', 'chicken kiev', 'ready meal', 'lasagne'] },
   { id: 'dairy', words: ['milk', 'pints', 'cheese', 'cheddar', 'butter', 'yogurt', 'yoghurt', 'cream', 'eggs', 'lurpak', 'mozzarella'] },
   { id: 'bakery', words: ['bread', 'slcd', 'sliced', 'roll', 'buns', 'bagel', 'wrap', 'croissant', 'loaf', 'baguette', 'crumpet', 'warburtons', 'hovis', 'pitta', 'naan'] },
@@ -42,8 +46,11 @@ const PERSONAS: Record<string, Omit<Persona, 'id'>> = {
   allrounder: { title: 'The All-Rounder', emoji: '🛒', blurb: 'A bit of everything. No aisle left behind.' },
 }
 
-// Names that contain a keyword but belong elsewhere ("wine gums", "beer battered").
+// Names that contain a keyword but belong elsewhere ("wine gums", "beer battered",
+// "apple pie", "tomato ketchup", "black pepper").
 const NOT_BOOZE = /wine gum|vinegar|vngr|battered/
+const NOT_FIZZY = /cola bottles|\b(sweets?|chews?|jelly|gums?|lolly|lollies)\b/
+const NOT_FRESH = /\b(pies?|tarts?|jam|curd|crumble|flavou?r(ed)?|sauce|ketchup|chutney|milkshake|smoothie|black pepper|ground|sweets?|chews?|squash|cordial|lollies|lolly)\b/
 
 // Whole-word matching (with an optional plural "s") so "gin" doesn't match "original".
 const escape = (w: string) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -57,6 +64,8 @@ export function categorise(item: Item): string | null {
   const n = item.name.toLowerCase()
   for (const m of MATCHERS) {
     if (m.id === 'booze' && NOT_BOOZE.test(n)) continue
+    if (m.id === 'fizzy' && NOT_FIZZY.test(n)) continue
+    if (m.id === 'fresh' && NOT_FRESH.test(n)) continue
     if (m.re.test(n)) return m.id
   }
   return null
